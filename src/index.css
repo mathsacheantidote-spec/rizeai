@@ -191,10 +191,7 @@
     transition: var(--transition-spring);
   }
 
-  /* Mobile app frame for desktop preview */
-  .app-shell {
-    @apply mx-auto w-full max-w-[480px] min-h-screen relative bg-background;
-  }
+  /* (Legacy mobile-only app shell removed — layout now responsive) */
 
   .tap-scale {
     @apply transition-transform duration-150 active:scale-[0.97];
