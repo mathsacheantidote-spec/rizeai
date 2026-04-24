@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { CheckCircle2, Circle, Lock, Award, BookOpen, Hammer, ClipboardCheck, X, Sparkles, ExternalLink, Zap } from "lucide-react";
+import { CheckCircle2, Circle, Lock, Award, BookOpen, Hammer, ClipboardCheck, X, Sparkles, ExternalLink, Zap, ChevronDown } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { useRize } from "@/lib/store";
 import type { RoadmapStep, StepType } from "@/lib/rize-data";
@@ -19,6 +19,7 @@ export default function Roadmap() {
   const toggleStep = useRize((s) => s.toggleStep);
   const startStep = useRize((s) => s.startStep);
   const [active, setActive] = useState<RoadmapStep | null>(null);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const status = (s: RoadmapStep) =>
     completed.includes(s.id) ? "completed" : inProgress.includes(s.id) ? "in-progress" : s.status;
@@ -62,40 +63,83 @@ export default function Roadmap() {
                     const meta = TYPE_META[step.type];
                     const Icon = meta.icon;
                     const isLocked = st === "locked";
+                    const isOpen = !!expanded[step.id];
                     return (
                       <li key={step.id}>
-                        <button
-                          onClick={() => setActive(step)}
-                          className={`w-full text-left flex gap-3 items-start p-3 rounded-2xl border bg-card transition-base tap-scale ${
+                        <div
+                          className={`rounded-2xl border bg-card transition-base ${
                             st === "completed" ? "border-accent/40 bg-accent-soft/30" :
                             st === "in-progress" ? "border-primary/40 shadow-glow" :
                             "border-border"
                           } ${isLocked ? "opacity-60" : "hover:border-primary/40"}`}
                         >
-                          <div className="relative z-10 flex-shrink-0 h-11 w-11 rounded-2xl flex items-center justify-center bg-card border-2"
-                               style={{ borderColor: st === "completed" ? "hsl(var(--accent))" : st === "in-progress" ? "hsl(var(--primary))" : "hsl(var(--border))" }}>
-                            {st === "completed" ? (
-                              <CheckCircle2 className="h-5 w-5 text-accent" />
-                            ) : st === "locked" ? (
-                              <Lock className="h-4 w-4 text-muted-foreground" />
-                            ) : st === "in-progress" ? (
-                              <Circle className="h-5 w-5 text-primary fill-primary/20 animate-pulse" />
-                            ) : (
-                              <Circle className="h-5 w-5 text-muted-foreground" />
-                            )}
-                          </div>
-                          <div className="flex-1 min-w-0 pt-0.5">
-                            <div className="flex items-center gap-1.5">
-                              <Icon className={`h-3 w-3 ${meta.color}`} />
-                              <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{meta.label}</span>
+                          <button
+                            onClick={() => setExpanded((e) => ({ ...e, [step.id]: !e[step.id] }))}
+                            aria-expanded={isOpen}
+                            aria-controls={`why-${step.id}`}
+                            className="w-full text-left flex gap-3 items-start p-3 tap-scale"
+                          >
+                            <div className="relative z-10 flex-shrink-0 h-11 w-11 rounded-2xl flex items-center justify-center bg-card border-2"
+                                 style={{ borderColor: st === "completed" ? "hsl(var(--accent))" : st === "in-progress" ? "hsl(var(--primary))" : "hsl(var(--border))" }}>
+                              {st === "completed" ? (
+                                <CheckCircle2 className="h-5 w-5 text-accent" />
+                              ) : st === "locked" ? (
+                                <Lock className="h-4 w-4 text-muted-foreground" />
+                              ) : st === "in-progress" ? (
+                                <Circle className="h-5 w-5 text-primary fill-primary/20 animate-pulse" />
+                              ) : (
+                                <Circle className="h-5 w-5 text-muted-foreground" />
+                              )}
                             </div>
-                            <p className="font-semibold text-sm mt-0.5 leading-tight">{step.title}</p>
-                            <div className="flex flex-wrap gap-1.5 mt-2">
-                              <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">+{step.xp} XP</span>
-                              <span className="text-[10px] font-medium text-muted-foreground">⏱ {step.estTime}</span>
+                            <div className="flex-1 min-w-0 pt-0.5">
+                              <div className="flex items-center gap-1.5">
+                                <Icon className={`h-3 w-3 ${meta.color}`} />
+                                <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">{meta.label}</span>
+                              </div>
+                              <p className="font-semibold text-sm mt-0.5 leading-tight">{step.title}</p>
+                              <div className="flex flex-wrap gap-1.5 mt-2">
+                                <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground">+{step.xp} XP</span>
+                                <span className="text-[10px] font-medium text-muted-foreground">⏱ {step.estTime}</span>
+                              </div>
+                            </div>
+                            <ChevronDown
+                              className={`h-4 w-4 text-muted-foreground mt-1 flex-shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+                            />
+                          </button>
+
+                          {/* Inline AI explanation — tap to expand */}
+                          <div
+                            id={`why-${step.id}`}
+                            className={`grid transition-all duration-300 ease-out ${
+                              isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                            }`}
+                          >
+                            <div className="overflow-hidden">
+                              <div className="px-3 pb-3">
+                                <div className="rounded-xl bg-gradient-card border border-border p-3">
+                                  <div className="flex items-center gap-1.5 text-primary mb-1">
+                                    <Sparkles className="h-3 w-3" />
+                                    <span className="text-[10px] font-bold uppercase tracking-wider">
+                                      Why this matters for {role.title}
+                                    </span>
+                                  </div>
+                                  <p className="text-xs text-foreground/85 leading-relaxed">{step.whyItMatters}</p>
+                                  <div className="flex flex-wrap gap-1 mt-2">
+                                    {step.skillTags.map((t) => (
+                                      <span key={t} className="text-[9px] font-medium px-1.5 py-0.5 rounded-full bg-accent-soft text-accent">{t}</span>
+                                    ))}
+                                  </div>
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); setActive(step); }}
+                                    className="mt-3 text-[11px] font-semibold text-primary tap-scale"
+                                  >
+                                    Open full details →
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </button>
+                        </div>
                       </li>
                     );
                   })}

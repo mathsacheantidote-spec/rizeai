@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { AppShell } from "@/components/AppShell";
 import { useRize } from "@/lib/store";
-import { ChevronRight, LogOut, Moon, Bell, FileText, Target, GraduationCap, Award } from "lucide-react";
+import { ChevronRight, LogOut, Moon, Bell, FileText, Target, GraduationCap, Award, Building2 } from "lucide-react";
 import { useEffect, useState } from "react";
 
 export default function Profile() {
@@ -27,7 +27,8 @@ export default function Profile() {
 
   const menu = [
     { icon: Target, label: "Change target role", onClick: () => navigate("/goal") },
-    { icon: FileText, label: "Upload existing resume", onClick: () => {} },
+    { icon: FileText, label: "AI Resume Builder", onClick: () => navigate("/resume") },
+    { icon: Building2, label: "Institution admin", onClick: () => navigate("/admin") },
     { icon: Bell, label: "Notifications", onClick: () => {} },
   ];
 
