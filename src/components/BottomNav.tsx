@@ -114,14 +114,67 @@ export function SideNav() {
         </ul>
 
         <div className="mt-8 px-3">
-          <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Targeting</div>
-          <div className="rounded-2xl bg-gradient-card border border-border p-3">
-            <div className="text-2xl">{role.emoji}</div>
-            <div className="font-display font-bold text-sm mt-1 leading-tight">{role.title}</div>
-            <button onClick={() => navigate("/goal")} className="text-[11px] text-primary font-semibold mt-1 tap-scale">
-              Change role →
-            </button>
-          </div>
+          <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2 px-1">Targeting</div>
+          <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+            <PopoverTrigger asChild>
+              <button
+                className="w-full text-left rounded-2xl bg-gradient-card border border-border p-3 hover:border-primary/40 transition-base tap-scale group"
+                aria-label="Change target role"
+              >
+                <div className="flex items-start gap-2">
+                  <div className="text-2xl leading-none">{role.emoji}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-display font-bold text-sm leading-tight truncate">{role.title}</div>
+                    <div className="text-[10px] text-muted-foreground mt-0.5">{role.domain}</div>
+                  </div>
+                  <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground mt-1 group-hover:text-primary transition-base" />
+                </div>
+                <div className="text-[11px] text-primary font-semibold mt-2">Change role →</div>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent side="right" align="start" className="w-72 p-2">
+              <div className="px-2 py-1.5">
+                <p className="text-xs font-semibold">Switch target role</p>
+                <p className="text-[11px] text-muted-foreground">Re-runs your gap report and updates the roadmap.</p>
+              </div>
+              <ul className="max-h-80 overflow-y-auto mt-1">
+                {JOB_ROLES.map((r) => {
+                  const active = r.id === role.id;
+                  return (
+                    <li key={r.id}>
+                      <button
+                        onClick={() => handleRoleChange(r.id)}
+                        className={cn(
+                          "w-full flex items-center gap-2 px-2 py-2 rounded-lg text-left text-sm transition-base tap-scale",
+                          active ? "bg-primary/10 text-primary" : "hover:bg-muted"
+                        )}
+                      >
+                        <span className="text-lg leading-none">{r.emoji}</span>
+                        <span className="flex-1 min-w-0">
+                          <span className="block font-semibold text-sm leading-tight truncate">{r.title}</span>
+                          <span className="block text-[10px] text-muted-foreground">{r.domain}</span>
+                        </span>
+                        {active && <Check className="h-4 w-4 text-primary" />}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </PopoverContent>
+          </Popover>
+
+          <Link
+            to="/admin"
+            className={cn(
+              "mt-3 flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition-base tap-scale",
+              pathname.startsWith("/admin")
+                ? "bg-accent/10 text-accent"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            )}
+          >
+            <Building2 className="h-3.5 w-3.5" />
+            Institution admin
+          </Link>
         </div>
       </nav>
 
