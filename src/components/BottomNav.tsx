@@ -1,6 +1,7 @@
-import { Link, useLocation } from "react-router-dom";
-import { Home, Map, Sparkles, User } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Home, Map, Sparkles, User, Bell, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useRize } from "@/lib/store";
 
 const tabs = [
   { to: "/home", icon: Home, label: "Home" },
@@ -12,7 +13,7 @@ const tabs = [
 export function BottomNav() {
   const { pathname } = useLocation();
   return (
-    <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] z-40">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 lg:hidden">
       <div className="mx-3 mb-3 rounded-3xl border border-border/60 bg-card/85 backdrop-blur-lg shadow-elevated">
         <ul className="grid grid-cols-4 px-2 py-2">
           {tabs.map((t) => {
@@ -45,5 +46,101 @@ export function BottomNav() {
         </ul>
       </div>
     </nav>
+  );
+}
+
+export function SideNav() {
+  const { pathname } = useLocation();
+  const navigate = useNavigate();
+  const profile = useRize((s) => s.profile);
+  const role = useRize((s) => s.getRole)();
+  const reset = useRize((s) => s.reset);
+  const initials = (profile?.name || "You").split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+
+  return (
+    <aside className="hidden lg:flex sticky top-0 h-screen w-64 flex-col border-r border-border bg-card/50 backdrop-blur-sm">
+      <div className="px-6 py-6">
+        <Link to="/home" className="flex items-center gap-2">
+          <div className="h-9 w-9 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-glow">
+            <Sparkles className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <div>
+            <div className="font-display font-bold text-lg leading-none">Rize</div>
+            <div className="text-[10px] text-muted-foreground italic">Rise with a Z</div>
+          </div>
+        </Link>
+      </div>
+
+      <nav className="flex-1 px-3">
+        <ul className="space-y-1">
+          {tabs.map((t) => {
+            const active = pathname.startsWith(t.to);
+            const Icon = t.icon;
+            return (
+              <li key={t.to}>
+                <Link
+                  to={t.to}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-base tap-scale",
+                    active
+                      ? "bg-primary text-primary-foreground shadow-glow"
+                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                  )}
+                >
+                  <Icon className="h-4 w-4" strokeWidth={active ? 2.5 : 2} />
+                  {t.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+
+        <div className="mt-8 px-3">
+          <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground mb-2">Targeting</div>
+          <div className="rounded-2xl bg-gradient-card border border-border p-3">
+            <div className="text-2xl">{role.emoji}</div>
+            <div className="font-display font-bold text-sm mt-1 leading-tight">{role.title}</div>
+            <button onClick={() => navigate("/goal")} className="text-[11px] text-primary font-semibold mt-1 tap-scale">
+              Change role →
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <div className="p-3 border-t border-border">
+        <div className="flex items-center gap-3 px-2 py-2">
+          <div className="h-9 w-9 rounded-full bg-gradient-primary flex items-center justify-center text-primary-foreground font-display font-bold text-xs">
+            {initials}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-semibold truncate">{profile?.name || "Your name"}</div>
+            <div className="text-[10px] text-muted-foreground truncate">{profile?.email || ""}</div>
+          </div>
+          <button
+            onClick={() => { reset(); navigate("/"); }}
+            className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive flex items-center justify-center text-muted-foreground transition-base"
+            aria-label="Reset"
+            title="Reset & start over"
+          >
+            <LogOut className="h-4 w-4" />
+          </button>
+        </div>
+      </div>
+    </aside>
+  );
+}
+
+export function TopBar({ title }: { title?: string }) {
+  return (
+    <header className="hidden lg:flex sticky top-0 z-30 h-16 items-center justify-between px-8 border-b border-border bg-background/80 backdrop-blur-md">
+      <div>
+        {title && <h1 className="font-display font-bold text-lg">{title}</h1>}
+      </div>
+      <div className="flex items-center gap-2">
+        <button className="h-10 w-10 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground transition-base" aria-label="Notifications">
+          <Bell className="h-4 w-4" />
+        </button>
+      </div>
+    </header>
   );
 }
