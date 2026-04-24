@@ -58,8 +58,22 @@ export function SideNav() {
   const navigate = useNavigate();
   const profile = useRize((s) => s.profile);
   const role = useRize((s) => s.getRole)();
+  const selectRole = useRize((s) => s.selectRole);
   const reset = useRize((s) => s.reset);
   const initials = (profile?.name || "You").split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+  const [pickerOpen, setPickerOpen] = useState(false);
+
+  const handleRoleChange = (newId: string) => {
+    if (newId === role.id) { setPickerOpen(false); return; }
+    const next = JOB_ROLES.find((r) => r.id === newId);
+    selectRole(newId);
+    setPickerOpen(false);
+    toast({
+      title: `Now targeting ${next?.title ?? "new role"}`,
+      description: "Re-running your gap report and updating your roadmap…",
+    });
+    navigate("/gap");
+  };
 
   return (
     <aside className="hidden lg:flex sticky top-0 h-screen w-64 flex-col border-r border-border bg-card/50 backdrop-blur-sm">
