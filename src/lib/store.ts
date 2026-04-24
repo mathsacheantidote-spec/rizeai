@@ -11,6 +11,14 @@ export interface UserProfile {
   targetRoleId: string;
 }
 
+export interface GeneratedResume {
+  dataUrl: string; // base64 data URL of the PDF
+  filename: string;
+  atsScore: number;
+  generatedAt: number; // epoch ms
+  roleId: string;
+}
+
 interface RizeState {
   onboarded: boolean;
   profile: UserProfile | null;
@@ -18,12 +26,14 @@ interface RizeState {
   roadmap: RoadmapPhase[];
   completedSteps: string[];
   inProgressSteps: string[];
+  resume: GeneratedResume | null;
   setProfile: (p: Partial<UserProfile>) => void;
   setQuizAnswer: (qid: string, score: number) => void;
   selectRole: (roleId: string) => void;
   finishOnboarding: () => void;
   toggleStep: (stepId: string) => void;
   startStep: (stepId: string) => void;
+  saveResume: (r: GeneratedResume) => void;
   reset: () => void;
 
   // Derived
@@ -50,6 +60,7 @@ export const useRize = create<RizeState>()(
       roadmap: getRoadmap("swe"),
       completedSteps: ["f1", "f2"],
       inProgressSteps: ["f3"],
+      resume: null,
 
       setProfile: (p) =>
         set((s) => ({ profile: { ...(s.profile ?? initialProfile), ...p } })),
