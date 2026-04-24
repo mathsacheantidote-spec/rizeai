@@ -94,6 +94,8 @@ export const useRize = create<RizeState>()(
             : [...s.inProgressSteps, stepId],
         })),
 
+      saveResume: (r) => set({ resume: r }),
+
       reset: () =>
         set({
           onboarded: false,
@@ -102,6 +104,7 @@ export const useRize = create<RizeState>()(
           roadmap: getRoadmap("swe"),
           completedSteps: [],
           inProgressSteps: [],
+          resume: null,
         }),
 
       getRole: () => {
