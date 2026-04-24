@@ -1,7 +1,11 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, Map, Sparkles, User, Bell, LogOut } from "lucide-react";
+import { useState } from "react";
+import { Home, Map, Sparkles, User, Bell, LogOut, Check, ChevronsUpDown, Building2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRize } from "@/lib/store";
+import { JOB_ROLES } from "@/lib/rize-data";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { toast } from "@/hooks/use-toast";
 
 const tabs = [
   { to: "/home", icon: Home, label: "Home" },
