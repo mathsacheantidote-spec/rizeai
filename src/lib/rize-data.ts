@@ -27,20 +27,21 @@ export interface JobRole {
   title: string;
   emoji: string;
   domain: string;
+  salary: string;
   keywords: string[];
 }
 
 export const JOB_ROLES: JobRole[] = [
-  { id: "swe", title: "Software Engineer", emoji: "💻", domain: "Tech", keywords: ["JavaScript", "Data Structures", "System Design", "Git", "React", "APIs"] },
-  { id: "data", title: "Data Analyst", emoji: "📊", domain: "Data", keywords: ["SQL", "Python", "Excel", "Tableau", "Statistics", "Storytelling"] },
-  { id: "pm", title: "Product Manager", emoji: "🚀", domain: "Product", keywords: ["Roadmapping", "User Research", "Analytics", "Prioritization", "SQL"] },
-  { id: "ux", title: "UI/UX Designer", emoji: "🎨", domain: "Design", keywords: ["Figma", "User Research", "Prototyping", "Design Systems", "Accessibility"] },
-  { id: "marketing", title: "Marketing Manager", emoji: "📣", domain: "Marketing", keywords: ["SEO", "Content", "Analytics", "Brand", "Social Media"] },
-  { id: "ds", title: "Data Scientist", emoji: "🧠", domain: "Data", keywords: ["Python", "ML", "Statistics", "SQL", "Deep Learning"] },
-  { id: "cyber", title: "Cybersecurity Analyst", emoji: "🛡️", domain: "Security", keywords: ["Networks", "Linux", "SIEM", "Pen Testing", "Cryptography"] },
-  { id: "ba", title: "Business Analyst", emoji: "📈", domain: "Business", keywords: ["SQL", "Excel", "Stakeholders", "Process Mapping"] },
-  { id: "cloud", title: "Cloud Engineer", emoji: "☁️", domain: "Tech", keywords: ["AWS", "Docker", "K8s", "Linux", "CI/CD"] },
-  { id: "ai", title: "AI Engineer", emoji: "🤖", domain: "AI", keywords: ["Python", "PyTorch", "LLMs", "Prompting", "Vector DBs"] },
+  { id: "swe", title: "Software Engineer", emoji: "💻", domain: "Tech", salary: "₹8–18 LPA", keywords: ["JavaScript", "Data Structures", "System Design", "Git", "React", "APIs"] },
+  { id: "data", title: "Data Analyst", emoji: "📊", domain: "Data", salary: "₹6–14 LPA", keywords: ["SQL", "Python", "Excel", "Tableau", "Statistics", "Storytelling"] },
+  { id: "pm", title: "Product Manager", emoji: "🚀", domain: "Product", salary: "₹10–24 LPA", keywords: ["Roadmapping", "User Research", "Analytics", "Prioritization", "SQL"] },
+  { id: "ux", title: "UI/UX Designer", emoji: "🎨", domain: "Design", salary: "₹5–14 LPA", keywords: ["Figma", "User Research", "Prototyping", "Design Systems", "Accessibility"] },
+  { id: "marketing", title: "Marketing Manager", emoji: "📣", domain: "Marketing", salary: "₹5–13 LPA", keywords: ["SEO", "Content", "Analytics", "Brand", "Social Media"] },
+  { id: "ds", title: "Machine Learning Engineer", emoji: "🧠", domain: "AI", salary: "₹10–28 LPA", keywords: ["Python", "ML", "Statistics", "SQL", "Deep Learning"] },
+  { id: "cyber", title: "Cybersecurity Analyst", emoji: "🛡️", domain: "Security", salary: "₹7–18 LPA", keywords: ["Networks", "Linux", "SIEM", "Pen Testing", "Cryptography"] },
+  { id: "ba", title: "Business Analyst", emoji: "📈", domain: "Business", salary: "₹6–16 LPA", keywords: ["SQL", "Excel", "Stakeholders", "Process Mapping"] },
+  { id: "cloud", title: "Cloud Architect", emoji: "☁️", domain: "Cloud", salary: "₹14–35 LPA", keywords: ["AWS", "Docker", "K8s", "Linux", "CI/CD"] },
+  { id: "devops", title: "DevOps Engineer", emoji: "⚙️", domain: "Cloud", salary: "₹9–22 LPA", keywords: ["Linux", "Docker", "K8s", "CI/CD", "Monitoring"] },
 ];
 
 export interface QuizQuestion {
