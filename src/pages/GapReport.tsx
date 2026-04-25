@@ -13,6 +13,7 @@ export default function GapReport() {
   const role = useRize((s) => s.getRole)();
   const clusters = useRize((s) => s.getClusters)();
   const overall = useRize((s) => s.getOverallScore)();
+  const insights = useRize((s) => s.getGapInsights)();
 
   useEffect(() => {
     const t = setTimeout(() => setLoading(false), 1400);
@@ -36,7 +37,7 @@ export default function GapReport() {
     );
   }
 
-  const gaps = clusters.filter((c) => c.score < 60).slice(0, 3);
+  const gaps = insights.filter((g) => g.gap > 0).slice(0, 5);
 
   return (
     <AppShell hideNav>
@@ -56,7 +57,7 @@ export default function GapReport() {
           <div className="bg-card rounded-3xl p-6 shadow-elevated flex flex-col items-center animate-float-up">
             <ScoreRing value={overall} label="Match Score" sublabel="vs target role" />
             <p className="text-center text-sm text-muted-foreground mt-4 max-w-xs">
-              {overall >= 70 ? "Strong start! Polish a few areas and you're job-ready." : overall >= 40 ? "Solid foundation. Your roadmap will close the key gaps." : "Plenty of runway — your personalized roadmap starts now."}
+              {gaps.length === 0 ? "You meet the core benchmarks for this role. Keep adding portfolio proof." : `Your biggest opportunity is ${gaps[0].skill.toLowerCase()}, with a ${gaps[0].gap}-point gap to close.`}
             </p>
           </div>
         </div>
@@ -71,13 +72,20 @@ export default function GapReport() {
             </div>
           )}
           {gaps.map((g) => (
-            <div key={g.name} className="bg-card border border-border rounded-2xl p-4 shadow-card">
-              <div className="flex justify-between items-center mb-2">
-                <span className="font-semibold text-sm">{g.name}</span>
-                <span className="text-xs font-bold tabular-nums" style={{ color: g.color }}>{g.score}%</span>
+            <div key={g.skill} className="bg-card border border-border rounded-2xl p-4 shadow-card">
+              <div className="flex justify-between items-start gap-3 mb-2">
+                <div>
+                  <span className="font-semibold text-sm">{g.skill}</span>
+                  <p className="text-xs text-muted-foreground mt-1">{g.recommendation}</p>
+                </div>
+                <span className="shrink-0 text-xs font-bold tabular-nums text-primary">-{g.gap} pts</span>
               </div>
               <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div className="h-full transition-all duration-700" style={{ width: `${g.score}%`, background: g.color }} />
+                <div className="h-full bg-gradient-primary transition-all duration-700" style={{ width: `${g.current}%` }} />
+              </div>
+              <div className="mt-2 flex justify-between text-[11px] text-muted-foreground">
+                <span>Current {g.current}%</span>
+                <span>Target {g.target}%</span>
               </div>
             </div>
           ))}

@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { JOB_ROLES, type JobRole, getRoadmap, type RoadmapPhase, clusterScoresFromQuiz, type SkillCluster, overallScore } from "./rize-data";
+import { JOB_ROLES, type JobRole, getRoadmap, type RoadmapPhase, clusterScoresFromQuiz, type SkillCluster, overallScore, getSkillGapInsights, type SkillGapInsight } from "./rize-data";
 
 export interface UserProfile {
   name: string;
@@ -39,6 +39,7 @@ interface RizeState {
   // Derived
   getRole: () => JobRole | null;
   getClusters: () => SkillCluster[];
+  getGapInsights: () => SkillGapInsight[];
   getOverallScore: () => number;
 }
 
@@ -113,6 +114,12 @@ export const useRize = create<RizeState>()(
       },
 
       getClusters: () => clusterScoresFromQuiz(get().quizAnswers),
+
+      getGapInsights: () => {
+        const clusters = clusterScoresFromQuiz(get().quizAnswers);
+        const roleId = get().profile?.targetRoleId ?? "swe";
+        return getSkillGapInsights(clusters, roleId);
+      },
 
       getOverallScore: () => {
         const clusters = clusterScoresFromQuiz(get().quizAnswers);
