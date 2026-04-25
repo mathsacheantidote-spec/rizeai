@@ -10,10 +10,9 @@ interface AppShellProps {
 
 export function AppShell({ children, hideNav, contentWidth = "wide" }: AppShellProps) {
   if (hideNav) {
-    // Onboarding screens — center a phone-like card on desktop, full screen on mobile
     return (
-      <div className="min-h-screen w-full bg-muted/30 flex items-center justify-center lg:p-6">
-        <div className="w-full lg:max-w-md min-h-screen lg:min-h-0 lg:rounded-3xl lg:overflow-hidden bg-background lg:shadow-elevated">
+      <div className="min-h-screen w-full bg-background">
+        <div className="w-full min-h-screen bg-background">
           {children}
         </div>
       </div>
@@ -29,7 +28,7 @@ export function AppShell({ children, hideNav, contentWidth = "wide" }: AppShellP
     <div className="min-h-screen w-full bg-background flex">
       <SideNav />
       <div className="flex-1 min-w-0 flex flex-col">
-        <main className={`flex-1 pb-28 lg:pb-10 mx-auto w-full ${widthClass}`}>
+        <main className={`flex-1 pb-28 lg:pb-10 mx-auto w-full px-0 lg:px-8 ${widthClass}`}>
           {children}
         </main>
         <BottomNav />
