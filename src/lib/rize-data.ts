@@ -207,6 +207,36 @@ export interface SkillCluster {
   color: string;
 }
 
+export interface SkillGapInsight {
+  skill: string;
+  current: number;
+  target: number;
+  gap: number;
+  priority: "high" | "medium" | "low";
+  recommendation: string;
+}
+
+const roleSkillTargets: Record<string, Record<string, number>> = {
+  swe: { "Technical": 82, "Problem Solving": 80, "Tools & Software": 76, "Communication": 64, "Domain Knowledge": 60 },
+  data: { "Technical": 72, "Tools & Software": 84, "Problem Solving": 76, "Communication": 70, "Domain Knowledge": 66 },
+  pm: { "Communication": 84, "Problem Solving": 78, "Domain Knowledge": 76, "Tools & Software": 66, "Technical": 54 },
+  ux: { "Communication": 78, "Domain Knowledge": 74, "Problem Solving": 72, "Tools & Software": 70, "Technical": 48 },
+  marketing: { "Communication": 82, "Domain Knowledge": 76, "Tools & Software": 68, "Problem Solving": 64, "Technical": 42 },
+  ds: { "Technical": 86, "Problem Solving": 82, "Tools & Software": 78, "Domain Knowledge": 68, "Communication": 62 },
+  cyber: { "Technical": 82, "Tools & Software": 80, "Problem Solving": 78, "Domain Knowledge": 72, "Communication": 58 },
+  ba: { "Communication": 80, "Tools & Software": 76, "Problem Solving": 74, "Domain Knowledge": 70, "Technical": 56 },
+  cloud: { "Technical": 84, "Tools & Software": 82, "Problem Solving": 76, "Domain Knowledge": 68, "Communication": 60 },
+  devops: { "Technical": 82, "Tools & Software": 84, "Problem Solving": 76, "Domain Knowledge": 66, "Communication": 60 },
+};
+
+const clusterRecommendations: Record<string, string> = {
+  "Technical": "Build one portfolio project using the core stack for your target role.",
+  "Communication": "Practice writing project summaries and explaining trade-offs out loud.",
+  "Problem Solving": "Complete timed problem sets and document your solution approach.",
+  "Domain Knowledge": "Read role-specific case studies and track the trends shaping this domain.",
+  "Tools & Software": "Spend focused reps inside the tools recruiters expect for this role.",
+};
+
 export function clusterScoresFromQuiz(answers: Record<string, number>): SkillCluster[] {
   const buckets: Record<string, number[]> = {
     "Technical": [], "Communication": [], "Problem Solving": [], "Domain Knowledge": [], "Tools & Software": [],
@@ -232,4 +262,22 @@ export function clusterScoresFromQuiz(answers: Record<string, number>): SkillClu
 export function overallScore(clusters: SkillCluster[]): number {
   if (!clusters.length) return 0;
   return Math.round(clusters.reduce((a, c) => a + c.score, 0) / clusters.length);
+}
+
+export function getSkillGapInsights(clusters: SkillCluster[], roleId: string): SkillGapInsight[] {
+  const targets = roleSkillTargets[roleId] ?? roleSkillTargets.swe;
+  return clusters
+    .map((cluster) => {
+      const target = targets[cluster.name] ?? 70;
+      const gap = Math.max(0, target - cluster.score);
+      return {
+        skill: cluster.name,
+        current: cluster.score,
+        target,
+        gap,
+        priority: gap >= 25 ? "high" : gap >= 12 ? "medium" : "low",
+        recommendation: gap > 0 ? clusterRecommendations[cluster.name] : "You are ahead of the role benchmark here — keep adding proof through projects.",
+      };
+    })
+    .sort((a, b) => b.gap - a.gap);
 }
