@@ -270,12 +270,13 @@ export function getSkillGapInsights(clusters: SkillCluster[], roleId: string): S
     .map((cluster) => {
       const target = targets[cluster.name] ?? 70;
       const gap = Math.max(0, target - cluster.score);
+      const priority: SkillGapInsight["priority"] = gap >= 25 ? "high" : gap >= 12 ? "medium" : "low";
       return {
         skill: cluster.name,
         current: cluster.score,
         target,
         gap,
-        priority: gap >= 25 ? "high" : gap >= 12 ? "medium" : "low",
+        priority,
         recommendation: gap > 0 ? clusterRecommendations[cluster.name] : "You are ahead of the role benchmark here — keep adding proof through projects.",
       };
     })
