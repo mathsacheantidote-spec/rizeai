@@ -9,16 +9,20 @@ import { Button } from "@/components/ui/button";
 export default function Quiz() {
   const navigate = useNavigate();
   const setQuizAnswer = useRize((s) => s.setQuizAnswer);
+  const quizAnswers = useRize((s) => s.quizAnswers);
   const [idx, setIdx] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
 
   const q = QUIZ_QUESTIONS[idx];
-  const progress = ((idx) / QUIZ_QUESTIONS.length) * 100;
+  const selected = q.options.findIndex((opt) => opt.score === quizAnswers[q.id]);
+  const answeredCount = Object.keys(quizAnswers).length;
+  const progress = ((idx + (selected >= 0 ? 1 : 0)) / QUIZ_QUESTIONS.length) * 100;
+
+  const chooseAnswer = (optionIndex: number) => {
+    setQuizAnswer(q.id, q.options[optionIndex].score);
+  };
 
   const next = () => {
-    if (selected === null) return;
-    setQuizAnswer(q.id, q.options[selected].score);
-    setSelected(null);
+    if (selected < 0) return;
     if (idx + 1 < QUIZ_QUESTIONS.length) {
       setIdx(idx + 1);
     } else {
@@ -51,7 +55,7 @@ export default function Quiz() {
               return (
                 <button
                   key={i}
-                  onClick={() => setSelected(i)}
+                  onClick={() => chooseAnswer(i)}
                   className={`w-full text-left p-4 rounded-2xl border-2 transition-base tap-scale ${
                     active
                       ? "border-primary bg-primary/5 shadow-glow"
@@ -72,8 +76,8 @@ export default function Quiz() {
           </div>
         </div>
 
-        <Button onClick={next} disabled={selected === null} className="w-full h-12 rounded-full bg-gradient-primary text-primary-foreground font-semibold mt-6 shadow-glow disabled:opacity-50 disabled:shadow-none">
-          {idx + 1 === QUIZ_QUESTIONS.length ? "See results" : "Next"}
+        <Button onClick={next} disabled={selected < 0} className="w-full h-12 rounded-full bg-gradient-primary text-primary-foreground font-semibold mt-6 shadow-glow disabled:opacity-50 disabled:shadow-none">
+          {idx + 1 === QUIZ_QUESTIONS.length ? `See ${answeredCount}/${QUIZ_QUESTIONS.length} results` : "Next"}
         </Button>
       </div>
     </AppShell>
