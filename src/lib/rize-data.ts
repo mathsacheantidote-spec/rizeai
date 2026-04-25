@@ -160,6 +160,47 @@ export const NEWS_ITEMS: NewsItem[] = [
   { id: "n4", domain: "Tech", headline: "Why React is still the highest-paid frontend skill", source: "Dev.to", readTime: "4 min", tag: "Trending", summary: "Despite framework churn, React job postings continue to dominate frontend listings.", whyForYou: "React is in your Core phase — high ROI to lock in soon." },
 ];
 
+export interface ProjectRecommendation {
+  title: string;
+  level: "Beginner" | "Intermediate" | "Advanced";
+  roleFit: string;
+  skills: string[];
+  impact: string;
+}
+
+export const PROJECT_RECOMMENDATIONS: Record<string, ProjectRecommendation[]> = {
+  swe: [
+    { title: "Create a REST API with auth", level: "Intermediate", roleFit: "Backend proof", skills: ["APIs", "Databases", "Auth"], impact: "Shows you can ship production-style services." },
+    { title: "Build a campus placement tracker", level: "Intermediate", roleFit: "Full-stack proof", skills: ["React", "SQL", "Deployment"], impact: "Turns your portfolio into a realistic hiring artifact." },
+    { title: "Design a URL shortener system", level: "Advanced", roleFit: "System design", skills: ["Caching", "Scaling", "System Design"], impact: "Prepares you for architecture interview rounds." },
+  ],
+  data: [
+    { title: "Build a sales dashboard", level: "Beginner", roleFit: "Analytics proof", skills: ["SQL", "Excel", "Storytelling"], impact: "Proves you can convert raw data into business decisions." },
+    { title: "Customer churn analysis", level: "Intermediate", roleFit: "Business insight", skills: ["Python", "Statistics", "Visualization"], impact: "Strong interview story for analytics roles." },
+  ],
+};
+
+export const INTERVIEW_QUESTIONS = [
+  "Tell me about a project where you solved a hard technical problem.",
+  "How would you explain your strongest skill to a non-technical recruiter?",
+  "What would you learn next to become job-ready faster?",
+];
+
+export function roleMatchesFromSkills(clusters: SkillCluster[]) {
+  const tech = clusters.find((c) => c.name === "Technical")?.score ?? 30;
+  const tools = clusters.find((c) => c.name === "Tools & Software")?.score ?? 30;
+  const comm = clusters.find((c) => c.name === "Communication")?.score ?? 30;
+  const problem = clusters.find((c) => c.name === "Problem Solving")?.score ?? 30;
+  return JOB_ROLES.map((role) => {
+    const score = Math.round((
+      (role.domain === "Data" ? tools + tech : tech + problem) +
+      (role.domain === "Product" || role.domain === "Business" || role.domain === "Marketing" ? comm * 1.4 : comm) +
+      Math.min(100, role.keywords.length * 10)
+    ) / 3.4);
+    return { role, score: Math.min(96, score) };
+  }).sort((a, b) => b.score - a.score).slice(0, 4);
+}
+
 export interface SkillCluster {
   name: string;
   score: number;
