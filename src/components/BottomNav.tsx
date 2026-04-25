@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Home, Map, Sparkles, User, Bell, LogOut, Check, ChevronsUpDown, Building2 } from "lucide-react";
+import { Home, Map, Sparkles, User, Bell, LogOut, Check, ChevronsUpDown, Building2, FileText, Newspaper, Settings, Search, Brain } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRize } from "@/lib/store";
 import { JOB_ROLES } from "@/lib/rize-data";
@@ -12,6 +12,17 @@ const tabs = [
   { to: "/roadmap", icon: Map, label: "Roadmap" },
   { to: "/skills", icon: Sparkles, label: "Skills" },
   { to: "/profile", icon: User, label: "Profile" },
+];
+
+const sideTabs = [
+  { to: "/home", icon: Home, label: "Home" },
+  { to: "/roadmap", icon: Map, label: "Roadmap" },
+  { to: "/skills", icon: Sparkles, label: "Skills" },
+  { to: "/career-engine", icon: Brain, label: "Career Engine" },
+  { to: "/resume", icon: FileText, label: "Resume" },
+  { to: "/insights", icon: Newspaper, label: "Insights" },
+  { to: "/profile", icon: User, label: "Profile" },
+  { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
 export function BottomNav() {
@@ -76,7 +87,7 @@ export function SideNav() {
   };
 
   return (
-    <aside className="hidden lg:flex sticky top-0 h-screen w-64 flex-col border-r border-border bg-card/50 backdrop-blur-sm">
+    <aside className="hidden lg:flex sticky top-0 h-screen w-60 flex-col border-r border-sidebar-border bg-sidebar backdrop-blur-sm">
       <div className="px-6 py-6">
         <Link to="/home" className="flex items-center gap-2">
           <div className="h-9 w-9 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-glow">
@@ -91,7 +102,7 @@ export function SideNav() {
 
       <nav className="flex-1 px-3">
         <ul className="space-y-1">
-          {tabs.map((t) => {
+          {sideTabs.map((t) => {
             const active = pathname.startsWith(t.to);
             const Icon = t.icon;
             return (
@@ -99,10 +110,10 @@ export function SideNav() {
                 <Link
                   to={t.to}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-base tap-scale",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl border-l-2 text-sm font-medium transition-base tap-scale",
                     active
-                      ? "bg-primary text-primary-foreground shadow-glow"
-                      : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                      ? "border-primary bg-primary/15 text-foreground shadow-glow"
+                      : "border-transparent text-muted-foreground hover:text-foreground hover:bg-muted"
                   )}
                 >
                   <Icon className="h-4 w-4" strokeWidth={active ? 2.5 : 2} />
@@ -203,11 +214,15 @@ export function SideNav() {
 
 export function TopBar({ title }: { title?: string }) {
   return (
-    <header className="hidden lg:flex sticky top-0 z-30 h-16 items-center justify-between px-8 border-b border-border bg-background/80 backdrop-blur-md">
+    <header className="hidden lg:flex sticky top-0 z-30 h-16 items-center justify-between border-b border-border bg-background/80 backdrop-blur-md">
       <div>
         {title && <h1 className="font-display font-bold text-lg">{title}</h1>}
       </div>
       <div className="flex items-center gap-2">
+        <div className="flex h-10 w-72 items-center gap-2 rounded-full border border-border bg-input px-4 text-muted-foreground">
+          <Search className="h-4 w-4" />
+          <span className="text-sm">Search skills, roles, projects</span>
+        </div>
         <button className="h-10 w-10 rounded-full hover:bg-muted flex items-center justify-center text-muted-foreground transition-base" aria-label="Notifications">
           <Bell className="h-4 w-4" />
         </button>

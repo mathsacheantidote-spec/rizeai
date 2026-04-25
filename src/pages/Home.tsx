@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bell, Sparkles, Map, FileText, BarChart3, ChevronRight, CheckCircle2, Circle, Newspaper } from "lucide-react";
+import { Bell, Sparkles, Map, FileText, BarChart3, ChevronRight, CheckCircle2, Circle, Newspaper, Brain } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ScoreRing } from "@/components/ScoreRing";
 import { useRize } from "@/lib/store";
@@ -56,7 +56,7 @@ export default function Home() {
             { to: "/roadmap", icon: Map, label: "Roadmap" },
             { to: "/resume", icon: FileText, label: "Resume", lock: overall < 60 },
             { to: "/skills", icon: BarChart3, label: "Skills" },
-            { to: "/profile", icon: Sparkles, label: "Profile" },
+            { to: "/career-engine", icon: Brain, label: "Engine" },
           ].map((q) => (
             <Link key={q.to} to={q.to} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-card border border-border shadow-card tap-scale">
               <span className="h-9 w-9 rounded-xl bg-secondary flex items-center justify-center text-secondary-foreground">
@@ -110,7 +110,7 @@ export default function Home() {
             <h2 className="font-display font-bold text-lg flex items-center gap-2">
               <Newspaper className="h-4 w-4 text-accent" /> For you
             </h2>
-            <span className="text-xs font-medium text-primary">See all</span>
+            <Link to="/insights" className="text-xs font-medium text-primary">See all</Link>
           </div>
           <div className="flex gap-3 overflow-x-auto hide-scrollbar -mx-5 px-5 pb-2">
             {NEWS_ITEMS.map((n) => (

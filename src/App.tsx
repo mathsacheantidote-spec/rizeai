@@ -1,4 +1,3 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
@@ -16,12 +15,12 @@ import Skills from "./pages/Skills.tsx";
 import Profile from "./pages/Profile.tsx";
 import Resume from "./pages/Resume.tsx";
 import Admin from "./pages/Admin.tsx";
-
-const queryClient = new QueryClient();
+import Insights from "./pages/Insights.tsx";
+import Settings from "./pages/Settings.tsx";
+import CareerEngine from "./pages/CareerEngine.tsx";
 
 const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
+  <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
@@ -37,13 +36,15 @@ const App = () => (
           <Route path="/skills" element={<Skills />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/resume" element={<Resume />} />
+          <Route path="/insights" element={<Insights />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/career-engine" element={<CareerEngine />} />
           <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
+  </TooltipProvider>
 );
 
 export default App;

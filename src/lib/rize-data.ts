@@ -27,20 +27,21 @@ export interface JobRole {
   title: string;
   emoji: string;
   domain: string;
+  salary: string;
   keywords: string[];
 }
 
 export const JOB_ROLES: JobRole[] = [
-  { id: "swe", title: "Software Engineer", emoji: "💻", domain: "Tech", keywords: ["JavaScript", "Data Structures", "System Design", "Git", "React", "APIs"] },
-  { id: "data", title: "Data Analyst", emoji: "📊", domain: "Data", keywords: ["SQL", "Python", "Excel", "Tableau", "Statistics", "Storytelling"] },
-  { id: "pm", title: "Product Manager", emoji: "🚀", domain: "Product", keywords: ["Roadmapping", "User Research", "Analytics", "Prioritization", "SQL"] },
-  { id: "ux", title: "UI/UX Designer", emoji: "🎨", domain: "Design", keywords: ["Figma", "User Research", "Prototyping", "Design Systems", "Accessibility"] },
-  { id: "marketing", title: "Marketing Manager", emoji: "📣", domain: "Marketing", keywords: ["SEO", "Content", "Analytics", "Brand", "Social Media"] },
-  { id: "ds", title: "Data Scientist", emoji: "🧠", domain: "Data", keywords: ["Python", "ML", "Statistics", "SQL", "Deep Learning"] },
-  { id: "cyber", title: "Cybersecurity Analyst", emoji: "🛡️", domain: "Security", keywords: ["Networks", "Linux", "SIEM", "Pen Testing", "Cryptography"] },
-  { id: "ba", title: "Business Analyst", emoji: "📈", domain: "Business", keywords: ["SQL", "Excel", "Stakeholders", "Process Mapping"] },
-  { id: "cloud", title: "Cloud Engineer", emoji: "☁️", domain: "Tech", keywords: ["AWS", "Docker", "K8s", "Linux", "CI/CD"] },
-  { id: "ai", title: "AI Engineer", emoji: "🤖", domain: "AI", keywords: ["Python", "PyTorch", "LLMs", "Prompting", "Vector DBs"] },
+  { id: "swe", title: "Software Engineer", emoji: "💻", domain: "Tech", salary: "₹8–18 LPA", keywords: ["JavaScript", "Data Structures", "System Design", "Git", "React", "APIs"] },
+  { id: "data", title: "Data Analyst", emoji: "📊", domain: "Data", salary: "₹6–14 LPA", keywords: ["SQL", "Python", "Excel", "Tableau", "Statistics", "Storytelling"] },
+  { id: "pm", title: "Product Manager", emoji: "🚀", domain: "Product", salary: "₹10–24 LPA", keywords: ["Roadmapping", "User Research", "Analytics", "Prioritization", "SQL"] },
+  { id: "ux", title: "UI/UX Designer", emoji: "🎨", domain: "Design", salary: "₹5–14 LPA", keywords: ["Figma", "User Research", "Prototyping", "Design Systems", "Accessibility"] },
+  { id: "marketing", title: "Marketing Manager", emoji: "📣", domain: "Marketing", salary: "₹5–13 LPA", keywords: ["SEO", "Content", "Analytics", "Brand", "Social Media"] },
+  { id: "ds", title: "Machine Learning Engineer", emoji: "🧠", domain: "AI", salary: "₹10–28 LPA", keywords: ["Python", "ML", "Statistics", "SQL", "Deep Learning"] },
+  { id: "cyber", title: "Cybersecurity Analyst", emoji: "🛡️", domain: "Security", salary: "₹7–18 LPA", keywords: ["Networks", "Linux", "SIEM", "Pen Testing", "Cryptography"] },
+  { id: "ba", title: "Business Analyst", emoji: "📈", domain: "Business", salary: "₹6–16 LPA", keywords: ["SQL", "Excel", "Stakeholders", "Process Mapping"] },
+  { id: "cloud", title: "Cloud Architect", emoji: "☁️", domain: "Cloud", salary: "₹14–35 LPA", keywords: ["AWS", "Docker", "K8s", "Linux", "CI/CD"] },
+  { id: "devops", title: "DevOps Engineer", emoji: "⚙️", domain: "Cloud", salary: "₹9–22 LPA", keywords: ["Linux", "Docker", "K8s", "CI/CD", "Monitoring"] },
 ];
 
 export interface QuizQuestion {
@@ -158,6 +159,47 @@ export const NEWS_ITEMS: NewsItem[] = [
   { id: "n3", domain: "Tech", headline: "Microsoft opens campus hiring for 1,200 SDE roles", source: "Inc42", readTime: "2 min", tag: "Opportunity", summary: "Applications open until end of next month for 2026 graduating batch.", whyForYou: "Your target role aligns. Get your portfolio project shipped this week to apply." },
   { id: "n4", domain: "Tech", headline: "Why React is still the highest-paid frontend skill", source: "Dev.to", readTime: "4 min", tag: "Trending", summary: "Despite framework churn, React job postings continue to dominate frontend listings.", whyForYou: "React is in your Core phase — high ROI to lock in soon." },
 ];
+
+export interface ProjectRecommendation {
+  title: string;
+  level: "Beginner" | "Intermediate" | "Advanced";
+  roleFit: string;
+  skills: string[];
+  impact: string;
+}
+
+export const PROJECT_RECOMMENDATIONS: Record<string, ProjectRecommendation[]> = {
+  swe: [
+    { title: "Create a REST API with auth", level: "Intermediate", roleFit: "Backend proof", skills: ["APIs", "Databases", "Auth"], impact: "Shows you can ship production-style services." },
+    { title: "Build a campus placement tracker", level: "Intermediate", roleFit: "Full-stack proof", skills: ["React", "SQL", "Deployment"], impact: "Turns your portfolio into a realistic hiring artifact." },
+    { title: "Design a URL shortener system", level: "Advanced", roleFit: "System design", skills: ["Caching", "Scaling", "System Design"], impact: "Prepares you for architecture interview rounds." },
+  ],
+  data: [
+    { title: "Build a sales dashboard", level: "Beginner", roleFit: "Analytics proof", skills: ["SQL", "Excel", "Storytelling"], impact: "Proves you can convert raw data into business decisions." },
+    { title: "Customer churn analysis", level: "Intermediate", roleFit: "Business insight", skills: ["Python", "Statistics", "Visualization"], impact: "Strong interview story for analytics roles." },
+  ],
+};
+
+export const INTERVIEW_QUESTIONS = [
+  "Tell me about a project where you solved a hard technical problem.",
+  "How would you explain your strongest skill to a non-technical recruiter?",
+  "What would you learn next to become job-ready faster?",
+];
+
+export function roleMatchesFromSkills(clusters: SkillCluster[]) {
+  const tech = clusters.find((c) => c.name === "Technical")?.score ?? 30;
+  const tools = clusters.find((c) => c.name === "Tools & Software")?.score ?? 30;
+  const comm = clusters.find((c) => c.name === "Communication")?.score ?? 30;
+  const problem = clusters.find((c) => c.name === "Problem Solving")?.score ?? 30;
+  return JOB_ROLES.map((role) => {
+    const score = Math.round((
+      (role.domain === "Data" ? tools + tech : tech + problem) +
+      (role.domain === "Product" || role.domain === "Business" || role.domain === "Marketing" ? comm * 1.4 : comm) +
+      Math.min(100, role.keywords.length * 10)
+    ) / 3.4);
+    return { role, score: Math.min(96, score) };
+  }).sort((a, b) => b.score - a.score).slice(0, 4);
+}
 
 export interface SkillCluster {
   name: string;
