@@ -16,6 +16,9 @@ import Skills from "./pages/Skills.tsx";
 import Profile from "./pages/Profile.tsx";
 import Resume from "./pages/Resume.tsx";
 import Admin from "./pages/Admin.tsx";
+import Insights from "./pages/Insights.tsx";
+import Settings from "./pages/Settings.tsx";
+import CareerEngine from "./pages/CareerEngine.tsx";
 
 const queryClient = new QueryClient();
 
@@ -37,6 +40,9 @@ const App = () => (
           <Route path="/skills" element={<Skills />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/resume" element={<Resume />} />
+          <Route path="/insights" element={<Insights />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/career-engine" element={<CareerEngine />} />
           <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
