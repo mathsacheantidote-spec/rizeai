@@ -29,7 +29,8 @@
 
     --accent: 164 95% 43%;
     --accent-foreground: 240 20% 5%;
-    --accent-soft: 164 95% 43% / 0.14;
+    --accent-soft: 164 95% 43%;
+    --accent-soft-hsl: 164 95% 43% / 0.14;
 
     --success: 164 95% 43%;
     --warning: 38 92% 50%;
