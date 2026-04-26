@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Bell, Sparkles, Map, FileText, BarChart3, ChevronRight, CheckCircle2, Circle, Newspaper, Brain } from "lucide-react";
+import { Bell, Sparkles, Map, FileText, BarChart3, ChevronRight, CheckCircle2, Circle, Newspaper, Brain, Code2 } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import { ScoreRing } from "@/components/ScoreRing";
 import { useRize } from "@/lib/store";
@@ -51,12 +51,13 @@ export default function Home() {
         </div>
 
         {/* Quick links */}
-        <div className="px-5 mt-5 grid grid-cols-4 gap-2">
+        <div className="px-5 mt-5 grid grid-cols-5 gap-2">
           {[
             { to: "/roadmap", icon: Map, label: "Roadmap" },
             { to: "/resume", icon: FileText, label: "Resume", lock: overall < 60 },
             { to: "/skills", icon: BarChart3, label: "Skills" },
             { to: "/career-engine", icon: Brain, label: "Engine" },
+            { to: "/coding-lab", icon: Code2, label: "Code" },
           ].map((q) => (
             <Link key={q.to} to={q.to} className="flex flex-col items-center gap-1.5 p-3 rounded-2xl bg-card border border-border shadow-card tap-scale">
               <span className="h-9 w-9 rounded-xl bg-secondary flex items-center justify-center text-secondary-foreground">
