@@ -50,6 +50,24 @@ function buildHarness(slug: string, language: string, code: string) {
     return `${code}\nimport json\npass_count=0\ntests=${tests}\nfor t in tests:\n    args=t[:-1]; expected=t[-1]\n    try:\n        out=${fn}(*args)\n        if out == expected: pass_count += 1\n    except Exception:\n        pass\nprint(json.dumps({"pass": pass_count, "total": len(tests)}))`;
   }
 
+  if (language === "java") {
+    const body = slug === "two-sum-readiness"
+      ? `int pass=0,total=3; Solution s=new Solution(); if(java.util.Arrays.equals(s.twoSum(new int[]{2,7,11,15},9),new int[]{0,1})) pass++; if(java.util.Arrays.equals(s.twoSum(new int[]{3,2,4},6),new int[]{1,2})) pass++; if(java.util.Arrays.equals(s.twoSum(new int[]{-1,-2,-3,-4,-5},-8),new int[]{2,4})) pass++; System.out.println("{\\\"pass\\\":"+pass+",\\\"total\\\":"+total+"}");`
+      : slug === "api-log-parser"
+        ? `int pass=0,total=2; Solution s=new Solution(); java.util.Map<String,Integer> a=s.summarizeLogs(java.util.Arrays.asList("GET /users 200","POST /login 401")); if(a.getOrDefault("success",0)==1&&a.getOrDefault("clientError",0)==1&&a.getOrDefault("serverError",0)==0) pass++; java.util.Map<String,Integer> b=s.summarizeLogs(java.util.Arrays.asList("GET /a 200","POST /b 500","bad-line","GET /c 404")); if(b.getOrDefault("success",0)==1&&b.getOrDefault("clientError",0)==1&&b.getOrDefault("serverError",0)==1) pass++; System.out.println("{\\\"pass\\\":"+pass+",\\\"total\\\":"+total+"}");`
+        : `int pass=0,total=3; Solution s=new Solution(); if(s.averageValidScore(new int[]{70,90,110})==80) pass++; if(s.averageValidScore(new int[]{100,50,-4,51})==67) pass++; if(s.averageValidScore(new int[]{})==0) pass++; System.out.println("{\\\"pass\\\":"+pass+",\\\"total\\\":"+total+"}");`;
+    return `${code}\nclass Main { public static void main(String[] args) { ${body} } }`;
+  }
+
+  if (language === "cpp") {
+    const body = slug === "two-sum-readiness"
+      ? `int pass=0,total=3; Solution s; vector<int>a={2,7,11,15}; if(s.twoSum(a,9)==vector<int>{0,1}) pass++; vector<int>b={3,2,4}; if(s.twoSum(b,6)==vector<int>{1,2}) pass++; vector<int>c={-1,-2,-3,-4,-5}; if(s.twoSum(c,-8)==vector<int>{2,4}) pass++; cout<<"{\\\"pass\\\":"<<pass<<",\\\"total\\\":"<<total<<"}";`
+      : slug === "api-log-parser"
+        ? `int pass=0,total=2; auto a=summarizeLogs({"GET /users 200","POST /login 401"}); if(a["success"]==1&&a["clientError"]==1&&a["serverError"]==0) pass++; auto b=summarizeLogs({"GET /a 200","POST /b 500","bad-line","GET /c 404"}); if(b["success"]==1&&b["clientError"]==1&&b["serverError"]==1) pass++; cout<<"{\\\"pass\\\":"<<pass<<",\\\"total\\\":"<<total<<"}";`
+        : `int pass=0,total=3; if(averageValidScore({70,90,110})==80) pass++; if(averageValidScore({100,50,-4,51})==67) pass++; if(averageValidScore({})==0) pass++; cout<<"{\\\"pass\\\":"<<pass<<",\\\"total\\\":"<<total<<"}";`;
+    return `${code}\n#include <iostream>\nint main(){ ${body} return 0; }`;
+  }
+
   return null;
 }
 
