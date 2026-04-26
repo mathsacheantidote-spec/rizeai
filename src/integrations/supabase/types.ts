@@ -14,7 +14,119 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      coding_problems: {
+        Row: {
+          category: string
+          constraints_text: string | null
+          created_at: string
+          difficulty: string
+          examples: Json
+          hidden_tests: Json
+          id: string
+          input_format: string | null
+          output_format: string | null
+          prompt: string
+          scoring_weights: Json
+          slug: string
+          starter_code: Json
+          supported_languages: string[]
+          title: string
+        }
+        Insert: {
+          category: string
+          constraints_text?: string | null
+          created_at?: string
+          difficulty: string
+          examples?: Json
+          hidden_tests?: Json
+          id?: string
+          input_format?: string | null
+          output_format?: string | null
+          prompt: string
+          scoring_weights?: Json
+          slug: string
+          starter_code?: Json
+          supported_languages?: string[]
+          title: string
+        }
+        Update: {
+          category?: string
+          constraints_text?: string | null
+          created_at?: string
+          difficulty?: string
+          examples?: Json
+          hidden_tests?: Json
+          id?: string
+          input_format?: string | null
+          output_format?: string | null
+          prompt?: string
+          scoring_weights?: Json
+          slug?: string
+          starter_code?: Json
+          supported_languages?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
+      coding_submissions: {
+        Row: {
+          code: string
+          communication_score: number
+          correctness_score: number
+          created_at: string
+          employability_score: number
+          id: string
+          language: string
+          problem_id: string
+          quality_score: number
+          report: Json
+          speed_score: number
+          status: string
+          time_spent_seconds: number
+          user_id: string
+        }
+        Insert: {
+          code: string
+          communication_score?: number
+          correctness_score?: number
+          created_at?: string
+          employability_score?: number
+          id?: string
+          language: string
+          problem_id: string
+          quality_score?: number
+          report?: Json
+          speed_score?: number
+          status?: string
+          time_spent_seconds?: number
+          user_id: string
+        }
+        Update: {
+          code?: string
+          communication_score?: number
+          correctness_score?: number
+          created_at?: string
+          employability_score?: number
+          id?: string
+          language?: string
+          problem_id?: string
+          quality_score?: number
+          report?: Json
+          speed_score?: number
+          status?: string
+          time_spent_seconds?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "coding_submissions_problem_id_fkey"
+            columns: ["problem_id"]
+            isOneToOne: false
+            referencedRelation: "coding_problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
