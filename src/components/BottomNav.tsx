@@ -6,6 +6,7 @@ import { useRize } from "@/lib/store";
 import { JOB_ROLES } from "@/lib/rize-data";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
+import rizeLogo from "@/assets/rize-logo.png";
 
 const tabs = [
   { to: "/home", icon: Home, label: "Home" },
@@ -91,9 +92,7 @@ export function SideNav() {
     <aside className="hidden lg:flex sticky top-0 h-screen w-60 flex-col border-r border-sidebar-border bg-sidebar backdrop-blur-sm">
       <div className="px-6 py-6">
         <Link to="/home" className="flex items-center gap-2">
-          <div className="h-9 w-9 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-glow">
-            <Sparkles className="h-5 w-5 text-primary-foreground" />
-          </div>
+          <img src={rizeLogo} alt="Rize" className="h-10 w-16 object-contain drop-shadow-[0_0_18px_hsl(var(--primary)/0.45)]" />
           <div>
             <div className="font-display font-bold text-lg leading-none">Rize</div>
             <div className="text-[10px] text-muted-foreground italic">Rise with a Z</div>
