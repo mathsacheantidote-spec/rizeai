@@ -179,3 +179,25 @@
   0% { background-position: -400px 0; }
   100% { background-position: 400px 0; }
 }
+
+@keyframes loader-out {
+  0%, 72% { opacity: 1; visibility: visible; }
+  100% { opacity: 0; visibility: hidden; }
+}
+
+@keyframes logo-pop {
+  0% { opacity: 0; transform: scale(0.88) translateY(8px); filter: blur(6px); }
+  45%, 80% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+  100% { opacity: 0; transform: scale(1.04) translateY(-4px); }
+}
+
+@keyframes loader-bar {
+  0% { transform: translateX(-110%); }
+  100% { transform: translateX(220%); }
+}
+
+@layer utilities {
+  .animate-loader-out { animation: loader-out 1.45s ease forwards; }
+  .animate-logo-pop { animation: logo-pop 1.45s ease forwards; }
+  .animate-loader-bar { animation: loader-bar 1.05s ease-in-out infinite; }
+}
