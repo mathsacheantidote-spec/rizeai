@@ -235,14 +235,14 @@ export default function CodingLab() {
                   <p className="mt-2 text-xs text-muted-foreground">{result.report.summary}</p>
                 </div>
                 {[
-                  ["Correctness", result.correctnessScore, BadgeCheck],
-                  ["Code quality", result.qualityScore, Code2],
-                  ["Speed", result.speedScore, Clock3],
-                  ["Communication", result.communicationScore, FileSearch],
-                ].map(([label, value, Icon]) => (
-                  <div key={String(label)}>
-                    <div className="mb-1 flex items-center justify-between text-xs font-semibold"><span className="flex items-center gap-1.5"><Icon className="h-3.5 w-3.5 text-primary" />{String(label)}</span><span>{Number(value)}%</span></div>
-                    <Progress value={Number(value)} className="h-2" />
+                  { label: "Correctness", value: result.correctnessScore, icon: BadgeCheck },
+                  { label: "Code quality", value: result.qualityScore, icon: Code2 },
+                  { label: "Speed", value: result.speedScore, icon: Clock3 },
+                  { label: "Communication", value: result.communicationScore, icon: FileSearch },
+                ].map(({ label, value, icon: Icon }) => (
+                  <div key={label}>
+                    <div className="mb-1 flex items-center justify-between text-xs font-semibold"><span className="flex items-center gap-1.5"><Icon className="h-3.5 w-3.5 text-primary" />{label}</span><span>{value}%</span></div>
+                    <Progress value={value} className="h-2" />
                   </div>
                 ))}
                 <div className="rounded-xl bg-secondary p-3">
