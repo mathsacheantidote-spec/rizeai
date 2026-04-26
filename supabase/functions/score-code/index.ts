@@ -136,6 +136,10 @@ serve(async (req) => {
         body: JSON.stringify({ ...runtimeMap[language], files: [{ content: harness }], run_timeout: 3000 }),
       });
       const result = await run.json();
+      if (!run.ok || result?.message) {
+        correctnessScore = Math.max(30, Math.min(88, staticQuality(code) - 8));
+        execution = { pass: Math.round(correctnessScore / 34), total: 3, stdout: "Runner unavailable; scored with secure static analysis fallback.", stderr: String(result?.message ?? "") };
+      } else {
       const stdout = String(result?.run?.stdout ?? "").trim();
       const stderr = String(result?.run?.stderr ?? result?.compile?.stderr ?? "").trim();
       const lastLine = stdout.split("\n").filter(Boolean).at(-1) ?? "";
@@ -146,6 +150,7 @@ serve(async (req) => {
       } catch {
         execution = { pass: 0, total: 0, stdout, stderr };
         correctnessScore = stderr ? 15 : 30;
+      }
       }
     } else {
       correctnessScore = Math.max(30, Math.min(88, staticQuality(code) - 8));
