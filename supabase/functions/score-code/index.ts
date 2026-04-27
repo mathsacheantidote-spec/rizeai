@@ -168,13 +168,13 @@ function buildHarness(slug: string, language: Language, code: string, files?: Fi
   }
 
   if (language === "go") {
-    const cleanCode = fullCode.replace(/^\s*package\s+main\s*/, "package main\n");
+    const cleanCode = fullCode.replace(/^\s*package\s+main\s*/, "").trim();
     const body = spec.key === "twoSum"
       ? `pass,total:=0,3\nif reflect.DeepEqual(twoSum([]int{2,7,11,15},9),[]int{0,1}){pass++}\nif reflect.DeepEqual(twoSum([]int{3,2,4},6),[]int{1,2}){pass++}\nif reflect.DeepEqual(twoSum([]int{-1,-2,-3,-4,-5},-8),[]int{2,4}){pass++}\nfmt.Printf("__RIZE_RESULT__{\\\"pass\\\":%d,\\\"total\\\":%d}",pass,total)`
       : spec.key === "logs"
         ? `pass,total:=0,2\na:=summarizeLogs([]string{"GET /users 200","POST /login 401"}); if a["success"]==1&&a["clientError"]==1&&a["serverError"]==0{pass++}\nb:=summarizeLogs([]string{"GET /a 200","POST /b 500","bad-line","GET /c 404"}); if b["success"]==1&&b["clientError"]==1&&b["serverError"]==1{pass++}\nfmt.Printf("__RIZE_RESULT__{\\\"pass\\\":%d,\\\"total\\\":%d}",pass,total)`
         : `pass,total:=0,3\nif averageValidScore([]int{70,90,110})==80{pass++}\nif averageValidScore([]int{100,50,-4,51})==67{pass++}\nif averageValidScore([]int{})==0{pass++}\nfmt.Printf("__RIZE_RESULT__{\\\"pass\\\":%d,\\\"total\\\":%d}",pass,total)`;
-    return `${cleanCode}\nimport (\n  "fmt"\n  "reflect"\n)\nfunc main(){\n${body}\n}`;
+    return `package main\nimport (\n  "fmt"\n  "reflect"\n)\n${cleanCode}\nfunc main(){\n${body}\n}`;
   }
 
   return null;
