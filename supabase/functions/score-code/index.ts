@@ -59,7 +59,7 @@ function buildHarness(slug: string, language: string, code: string) {
           "POST /login 401",
         ], { success: 1, clientError: 1, serverError: 0 }], [["GET /a 200", "POST /b 500", "bad-line", "GET /c 404"], { success: 1, clientError: 1, serverError: 1 }]]
         : [[[70, 90, 110], 80], [[100, 50, -4, 51], 67], [[], 0]];
-    return `${code}\nconst deep=(a,b)=>JSON.stringify(a)===JSON.stringify(b);\nconst tests=${jsonEscape(tests)};\nconst results=[];\nfor (let i=0;i<tests.length;i++){ const t=tests[i]; let actual; let passed=false; try{ actual=${fn}.apply(null,t.slice(0,-1)); passed=deep(actual,t[t.length-1]); }catch(err){ actual=String(err?.message||err); } results.push({name:'Hidden test '+(i+1),passed,expected:JSON.stringify(t[t.length-1]),actual:JSON.stringify(actual)}); }\nconsole.log('__RIZE_RESULT__'+JSON.stringify({pass:results.filter(r=>r.passed).length,total:results.length,testResults:results}));`;
+    return `${code}\nconst deep=(a,b)=>JSON.stringify(a)===JSON.stringify(b);\nconst tests=${jsonEscape(tests)};\nconst results=[];\nfor (let i=0;i<tests.length;i++){ const t=tests[i]; let actual; let passed=false; try{ actual=${fn}.apply(null,t.slice(0,-1)); passed=deep(actual,t[t.length-1]); }catch(err){ actual=String((err && err.message) || err); } results.push({name:'Hidden test '+(i+1),passed,expected:JSON.stringify(t[t.length-1]),actual:JSON.stringify(actual)}); }\nconsole.log('__RIZE_RESULT__'+JSON.stringify({pass:results.filter(r=>r.passed).length,total:results.length,testResults:results}));`;
   }
 
   if (language === "python") {
