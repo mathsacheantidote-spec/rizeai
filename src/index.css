@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -196,8 +196,27 @@
   100% { transform: translateX(220%); }
 }
 
+@keyframes cursor-orbit {
+  0% { transform: translate3d(-50%, -50%, 0) rotate(0deg) scale(0.96); }
+  50% { transform: translate3d(-50%, -50%, 0) rotate(180deg) scale(1.08); }
+  100% { transform: translate3d(-50%, -50%, 0) rotate(360deg) scale(0.96); }
+}
+
+@keyframes cursor-breathe {
+  0%, 100% { transform: translate3d(-50%, -50%, 0) scale(0.9); opacity: 0.5; }
+  50% { transform: translate3d(-50%, -50%, 0) scale(1.16); opacity: 0.9; }
+}
+
+@keyframes ambient-drift {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(18px, -22px, 0) scale(1.08); }
+}
+
 @layer utilities {
   .animate-loader-out { animation: loader-out 1.45s ease forwards; }
   .animate-logo-pop { animation: logo-pop 1.45s ease forwards; }
   .animate-loader-bar { animation: loader-bar 1.05s ease-in-out infinite; }
+  .animate-cursor-orbit { animation: cursor-orbit 8s linear infinite; }
+  .animate-cursor-breathe { animation: cursor-breathe 2.4s ease-in-out infinite; }
+  .animate-ambient-drift { animation: ambient-drift 6s ease-in-out infinite; }
 }
