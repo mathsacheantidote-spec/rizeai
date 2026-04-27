@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { FileText, Map, Sparkles, Target, TrendingUp } from "lucide-react";
+import { FileText, Map, Target, TrendingUp } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
 import rizeLogo from "@/assets/rize-logo.png";
 
