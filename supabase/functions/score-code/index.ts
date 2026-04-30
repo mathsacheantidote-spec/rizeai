@@ -245,10 +245,12 @@ async function runWithJudge0(language: Language, harness: string): Promise<Execu
 async function runWithPiston(language: Language, harness: string): Promise<Execution | null> {
   const runtime = pistonRuntimeMap[language];
   if (!runtime) return null;
+  const ext: Record<Language, string> = { javascript: "js", typescript: "ts", python: "py", java: "java", cpp: "cpp", csharp: "cs", go: "go", ruby: "rb", php: "php" };
+  const fileName = language === "java" ? "Main.java" : `main.${ext[language]}`;
   const response = await fetch("https://emkc.org/api/v2/piston/execute", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...runtime, files: [{ name: `main.${language === "python" ? "py" : language === "cpp" ? "cpp" : language}`, content: harness }], run_timeout: 5000, compile_timeout: 7000 }),
+    body: JSON.stringify({ ...runtime, files: [{ name: fileName, content: harness }], run_timeout: 5000, compile_timeout: 10000 }),
   });
   const data = await response.json();
   if (!response.ok || data?.message) throw new Error(String(data?.message ?? response.statusText));
