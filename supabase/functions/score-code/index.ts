@@ -31,9 +31,9 @@ type Execution = {
 type FilePayload = { name: string; content: string };
 
 const pistonRuntimeMap: Partial<Record<Language, { language: string; version: string }>> = {
-  javascript: { language: "javascript", version: "18.15.0" },
+  javascript: { language: "javascript", version: "20.11.1" },
   typescript: { language: "typescript", version: "5.0.3" },
-  python: { language: "python", version: "3.10.0" },
+  python: { language: "python", version: "3.12.0" },
   java: { language: "java", version: "15.0.2" },
   cpp: { language: "c++", version: "10.2.0" },
   csharp: { language: "csharp", version: "6.12.0" },
@@ -303,14 +303,14 @@ serve(async (req) => {
 
     if (harness) {
       try {
-        execution = await runWithJudge0(language, harness) ?? execution;
+        execution = await runWithPiston(language, harness) ?? execution;
         if (execution.total === 0 && execution.stderr) throw new Error(execution.stderr.slice(0, 500));
-      } catch (judgeError) {
+      } catch (pistonError) {
         try {
-          execution = await runWithPiston(language, harness) ?? execution;
+          execution = await runWithJudge0(language, harness) ?? execution;
           if (execution.total === 0 && execution.stderr) throw new Error(execution.stderr.slice(0, 500));
-        } catch (pistonError) {
-          execution = staticExecution(code, `${judgeError instanceof Error ? judgeError.message : "Judge0 failed"}; ${pistonError instanceof Error ? pistonError.message : "Piston failed"}`);
+        } catch (judgeError) {
+          execution = staticExecution(code, `${pistonError instanceof Error ? pistonError.message : "Piston failed"}; ${judgeError instanceof Error ? judgeError.message : "Judge0 failed"}`);
         }
       }
     }
