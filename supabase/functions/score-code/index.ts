@@ -31,9 +31,9 @@ type Execution = {
 type FilePayload = { name: string; content: string };
 
 const pistonRuntimeMap: Partial<Record<Language, { language: string; version: string }>> = {
-  javascript: { language: "javascript", version: "18.15.0" },
+  javascript: { language: "javascript", version: "20.11.1" },
   typescript: { language: "typescript", version: "5.0.3" },
-  python: { language: "python", version: "3.10.0" },
+  python: { language: "python", version: "3.12.0" },
   java: { language: "java", version: "15.0.2" },
   cpp: { language: "c++", version: "10.2.0" },
   csharp: { language: "csharp", version: "6.12.0" },
@@ -245,10 +245,12 @@ async function runWithJudge0(language: Language, harness: string): Promise<Execu
 async function runWithPiston(language: Language, harness: string): Promise<Execution | null> {
   const runtime = pistonRuntimeMap[language];
   if (!runtime) return null;
+  const ext: Record<Language, string> = { javascript: "js", typescript: "ts", python: "py", java: "java", cpp: "cpp", csharp: "cs", go: "go", ruby: "rb", php: "php" };
+  const fileName = language === "java" ? "Main.java" : `main.${ext[language]}`;
   const response = await fetch("https://emkc.org/api/v2/piston/execute", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ ...runtime, files: [{ name: `main.${language === "python" ? "py" : language === "cpp" ? "cpp" : language}`, content: harness }], run_timeout: 5000, compile_timeout: 7000 }),
+    body: JSON.stringify({ ...runtime, files: [{ name: fileName, content: harness }], run_timeout: 5000, compile_timeout: 10000 }),
   });
   const data = await response.json();
   if (!response.ok || data?.message) throw new Error(String(data?.message ?? response.statusText));
@@ -303,14 +305,14 @@ serve(async (req) => {
 
     if (harness) {
       try {
-        execution = await runWithJudge0(language, harness) ?? execution;
+        execution = await runWithPiston(language, harness) ?? execution;
         if (execution.total === 0 && execution.stderr) throw new Error(execution.stderr.slice(0, 500));
-      } catch (judgeError) {
+      } catch (pistonError) {
         try {
-          execution = await runWithPiston(language, harness) ?? execution;
+          execution = await runWithJudge0(language, harness) ?? execution;
           if (execution.total === 0 && execution.stderr) throw new Error(execution.stderr.slice(0, 500));
-        } catch (pistonError) {
-          execution = staticExecution(code, `${judgeError instanceof Error ? judgeError.message : "Judge0 failed"}; ${pistonError instanceof Error ? pistonError.message : "Piston failed"}`);
+        } catch (judgeError) {
+          execution = staticExecution(code, `${pistonError instanceof Error ? pistonError.message : "Piston failed"}; ${judgeError instanceof Error ? judgeError.message : "Judge0 failed"}`);
         }
       }
     }

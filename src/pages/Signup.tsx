@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { AppShell } from "@/components/AppShell";
+import { CollegeAutocomplete } from "@/components/CollegeAutocomplete";
 import { useRize } from "@/lib/store";
 
 const YEARS = ["1st year", "2nd year", "3rd year", "4th year", "Recent grad"];
@@ -48,7 +49,7 @@ export default function Signup() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="college">College</Label>
-            <Input id="college" placeholder="IIT Delhi" value={form.college} onChange={(e) => setForm({ ...form, college: e.target.value })} className="h-12 rounded-xl" />
+            <CollegeAutocomplete id="college" placeholder="Start typing — e.g. IIT Delhi" value={form.college} onChange={(value) => setForm({ ...form, college: value })} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="program">Program</Label>
