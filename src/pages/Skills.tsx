@@ -1,7 +1,35 @@
 import { AppShell } from "@/components/AppShell";
 import { useRize } from "@/lib/store";
 import { ScoreRing } from "@/components/ScoreRing";
-import { Award, Target, CheckCircle2 } from "lucide-react";
+import { Award, Target, CheckCircle2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
+  ResponsiveContainer, Legend,
+} from "recharts";
+
+const skillAxes = [
+  { axis: "DSA & Problem Solving", you: 65, required: 85, tip: "Focus on Tree and Graph problems on LeetCode" },
+  { axis: "Web Development", you: 70, required: 90, tip: "Build 2-3 full-stack projects with React + Node.js" },
+  { axis: "System Design", you: 35, required: 80, tip: "Watch Gaurav Sen's playlist and practice HLD questions" },
+  { axis: "Tools & DevOps", you: 50, required: 75, tip: "Get hands-on with Docker, Git workflows, and CI/CD pipelines" },
+  { axis: "Soft Skills", you: 75, required: 80, tip: "Practice mock interviews on Pramp or InterviewBit" },
+  { axis: "Domain Knowledge", you: 60, required: 70, tip: "Read NPTEL notes and build domain-specific side projects" },
+];
+
+function gapColor(you: number, req: number) {
+  const gap = req - you;
+  if (gap <= 0) return "bg-accent";
+  if (gap <= 20) return "bg-warning";
+  return "bg-destructive";
+}
+
+function gapLabel(you: number, req: number) {
+  const gap = req - you;
+  if (gap <= 0) return "text-accent";
+  if (gap <= 20) return "text-warning";
+  return "text-destructive";
+}
 
 export default function Skills() {
   const role = useRize((s) => s.getRole)();
@@ -9,17 +37,7 @@ export default function Skills() {
   const overall = useRize((s) => s.getOverallScore)();
   const completed = useRize((s) => s.completedSteps);
 
-  // Build a simple radar polygon from cluster scores
-  const size = 240;
-  const center = size / 2;
-  const radius = 90;
-  const angle = (i: number) => (Math.PI * 2 * i) / clusters.length - Math.PI / 2;
-  const point = (score: number, i: number) => {
-    const r = (score / 100) * radius;
-    return [center + r * Math.cos(angle(i)), center + r * Math.sin(angle(i))];
-  };
-  const polygonPoints = clusters.map((c, i) => point(c.score, i).join(",")).join(" ");
-  const ringSteps = [0.25, 0.5, 0.75, 1];
+  const employability = 67;
 
   const badges = [
     { id: "starter", name: "First Step", earned: completed.length >= 1, icon: "🌱" },
@@ -32,71 +50,102 @@ export default function Skills() {
 
   return (
     <AppShell>
-      <div className="px-5 pt-6">
-        <h1 className="font-display text-2xl font-bold">Skill Dashboard</h1>
-        <p className="text-sm text-muted-foreground">Targeting <span className="font-semibold text-foreground">{role.title}</span></p>
+      <div className="px-5 pt-6 pb-10">
+        {/* Header */}
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="font-display text-2xl font-bold">Your Skill Map</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              Compared against your target role: <span className="font-semibold text-foreground">{role.title}</span>
+            </p>
+          </div>
+          <Button variant="outline" size="sm" className="text-xs rounded-xl gap-1.5">
+            <RefreshCw className="h-3.5 w-3.5" /> Retake Assessment
+          </Button>
+        </div>
 
-        <div className="mt-5 bg-gradient-card border border-border rounded-3xl p-5 shadow-card flex flex-col items-center animate-float-up">
+        {/* Radar Chart */}
+        <section className="mt-6 bg-card border border-border rounded-3xl p-5 shadow-card">
+          <div className="w-full" style={{ height: 340 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart data={skillAxes} cx="50%" cy="50%" outerRadius="72%">
+                <PolarGrid stroke="hsl(240 16% 20%)" />
+                <PolarAngleAxis
+                  dataKey="axis"
+                  tick={{ fill: "hsl(240 16% 58%)", fontSize: 10, fontWeight: 600 }}
+                />
+                <PolarRadiusAxis angle={90} domain={[0, 100]} tick={false} axisLine={false} />
+                <Radar
+                  name="Required for Software Engineer"
+                  dataKey="required"
+                  stroke="hsl(164 95% 43%)"
+                  fill="hsl(164 95% 43%)"
+                  fillOpacity={0.1}
+                  strokeWidth={2}
+                  strokeDasharray="6 3"
+                />
+                <Radar
+                  name="Your Current Level"
+                  dataKey="you"
+                  stroke="hsl(262 83% 58%)"
+                  fill="hsl(262 83% 58%)"
+                  fillOpacity={0.25}
+                  strokeWidth={2}
+                />
+                <Legend
+                  wrapperStyle={{ fontSize: 11, paddingTop: 12 }}
+                  iconType="circle"
+                  iconSize={8}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        </section>
+
+        {/* Gap Analysis */}
+        <section className="mt-6">
+          <h2 className="font-display font-bold text-lg mb-4">Skill Gap Analysis</h2>
+          <div className="space-y-3">
+            {skillAxes.map((s) => {
+              const gap = s.required - s.you;
+              return (
+                <div key={s.axis} className="bg-card border border-border rounded-2xl p-4 shadow-card">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-semibold">{s.axis}</span>
+                    <span className={`text-xs font-bold ${gapLabel(s.you, s.required)}`}>
+                      {s.you}% / {s.required}%
+                    </span>
+                  </div>
+                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                    <div
+                      className={`h-full rounded-full transition-all duration-700 ${gapColor(s.you, s.required)}`}
+                      style={{ width: `${Math.min(100, (s.you / s.required) * 100)}%` }}
+                    />
+                  </div>
+                  <p className="text-[11px] text-muted-foreground mt-2">{s.tip}</p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Employability Score */}
+        <section className="mt-8 bg-card border border-border rounded-3xl p-6 shadow-card flex flex-col items-center">
+          <ScoreRing value={employability} size={160} strokeWidth={14} label="Employability Score" />
+          <p className="text-sm text-muted-foreground text-center mt-4 max-w-md">
+            Strong foundation — bridge your <span className="font-semibold text-foreground">System Design</span> gap to unlock your resume
+          </p>
+        </section>
+
+        {/* Overall match */}
+        <div className="mt-6 bg-gradient-card border border-border rounded-3xl p-5 shadow-card flex flex-col items-center animate-float-up">
           <ScoreRing value={overall} size={140} strokeWidth={12} label="Overall match" />
-          <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold bg-accent-soft text-accent px-3 py-1.5 rounded-full">
+          <div className="mt-4 inline-flex items-center gap-1.5 text-xs font-semibold bg-accent/15 text-accent px-3 py-1.5 rounded-full">
             <Target className="h-3 w-3" /> Need {Math.max(0, 80 - overall)}% more for 80% match
           </div>
         </div>
 
-        {/* Radar chart */}
-        <section className="mt-6 bg-card border border-border rounded-3xl p-5 shadow-card">
-          <h2 className="font-display font-bold">Skill clusters</h2>
-          <div className="flex justify-center mt-2">
-            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-              {ringSteps.map((r, i) => (
-                <polygon
-                  key={i}
-                  fill="none" stroke="hsl(var(--border))" strokeWidth={1}
-                  points={clusters.map((_, idx) => {
-                    const x = center + (radius * r) * Math.cos(angle(idx));
-                    const y = center + (radius * r) * Math.sin(angle(idx));
-                    return `${x},${y}`;
-                  }).join(" ")}
-                />
-              ))}
-              {clusters.map((_, i) => {
-                const [x, y] = point(100, i);
-                return <line key={i} x1={center} y1={center} x2={x} y2={y} stroke="hsl(var(--border))" strokeWidth={1} />;
-              })}
-              <polygon points={polygonPoints} fill="hsl(var(--primary) / 0.2)" stroke="hsl(var(--primary))" strokeWidth={2} strokeLinejoin="round" />
-              {clusters.map((c, i) => {
-                const [x, y] = point(100, i);
-                const lx = center + (radius + 18) * Math.cos(angle(i));
-                const ly = center + (radius + 18) * Math.sin(angle(i));
-                return (
-                  <g key={c.name}>
-                    <circle cx={point(c.score, i)[0]} cy={point(c.score, i)[1]} r={3.5} fill="hsl(var(--primary))" />
-                    <text x={lx} y={ly} textAnchor="middle" dominantBaseline="middle"
-                          className="fill-muted-foreground" style={{ fontSize: 9, fontWeight: 600 }}>
-                      {c.name.split(" ")[0]}
-                    </text>
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
-
-          <div className="mt-4 space-y-3">
-            {clusters.map((c) => (
-              <div key={c.name}>
-                <div className="flex justify-between items-center mb-1">
-                  <span className="text-xs font-semibold">{c.name}</span>
-                  <span className="text-xs font-bold tabular-nums text-muted-foreground">{c.score}%</span>
-                </div>
-                <div className="h-1.5 rounded-full bg-muted overflow-hidden">
-                  <div className="h-full transition-all duration-700" style={{ width: `${c.score}%`, background: c.color }} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Keywords */}
+        {/* ATS Keywords */}
         <section className="mt-6">
           <h2 className="font-display font-bold mb-3">ATS keywords for {role.title}</h2>
           <div className="flex flex-wrap gap-2">
@@ -104,7 +153,7 @@ export default function Skills() {
               const got = i < Math.floor((overall / 100) * role.keywords.length);
               return (
                 <span key={k} className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-medium border ${
-                  got ? "bg-accent-soft text-accent border-accent/30" : "bg-card text-muted-foreground border-border"
+                  got ? "bg-accent/15 text-accent border-accent/30" : "bg-card text-muted-foreground border-border"
                 }`}>
                   {got && <CheckCircle2 className="h-3 w-3" />} {k}
                 </span>
