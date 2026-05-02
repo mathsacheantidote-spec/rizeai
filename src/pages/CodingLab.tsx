@@ -6,13 +6,15 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { BadgeCheck, BrainCircuit, CheckCircle2, Clock3, Code2, FileInput, FilePlus2, FileSearch, Gauge, History, Play, RotateCcw, Save, Search, ShieldCheck, Sparkles, Terminal, TrendingUp, Type, X, XCircle } from "lucide-react";
+import { BadgeCheck, BrainCircuit, CheckCircle2, Clock3, Code2, FileInput, FilePlus2, FileSearch, Gauge, History, Play, RotateCcw, Save, Search, ShieldCheck, Sparkles, Terminal, TrendingUp, Type, X, XCircle, AlertTriangle, ArrowRight, Zap } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type CodingProblem = Pick<Tables<"coding_problems">, "id" | "title" | "difficulty" | "category" | "prompt" | "input_format" | "output_format" | "examples" | "constraints_text" | "supported_languages" | "starter_code">;
 type Language = "javascript" | "typescript" | "python" | "java" | "cpp" | "csharp" | "go" | "ruby" | "php";
 type FileTab = { name: string; content: string };
 type TestResult = { name: string; passed: boolean; expected?: string; actual?: string };
 type HistoryItem = { id: string; problemId: string; problemTitle: string; language: Language; score: number; createdAt: number; result: ScoreResult };
+type AIFeedback = { score: number; timeComplexity: string; spaceComplexity: string; strengths: string[]; improvements: string[]; employabilityImpact: string; nextChallenge: string };
 type ScoreResult = {
   correctnessScore: number;
   qualityScore: number;
@@ -141,7 +143,8 @@ export default function CodingLab() {
   const [debugLines, setDebugLines] = useState<string[]>(["Debugger ready. Run code to capture stdout, stderr, tests, and runner status."]);
   const [editorTheme, setEditorTheme] = useState<keyof typeof editorThemes>("rize");
   const [editorFont, setEditorFont] = useState<keyof typeof editorFonts>("jetbrains");
-
+  const [aiFeedback, setAiFeedback] = useState<AIFeedback | null>(null);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
   useEffect(() => {
     const loadProblems = async () => {
       const { data } = await supabase.from("coding_problems").select("id,title,difficulty,category,prompt,input_format,output_format,examples,constraints_text,supported_languages,starter_code").order("created_at", { ascending: true });
@@ -208,14 +211,43 @@ export default function CodingLab() {
   const submit = async () => {
     setRunning(true);
     setResult(null);
+    setAiFeedback(null);
+    setFeedbackLoading(true);
     setDebugLines([`▶ Running ${selected.title}`, `Language: ${labels[language]}`, `Files attached: ${files.map((file) => file.name).join(", ")}`, "Sending code to compiler API..."]);
-    const { data, error } = await supabase.functions.invoke("score-code", { body: { problemId: selected.id, language, code, files, timeSpentSeconds: seconds } });
+
+    // Fire both requests in parallel
+    const [scoreRes, feedbackRes] = await Promise.allSettled([
+      supabase.functions.invoke("score-code", { body: { problemId: selected.id, language, code, files, timeSpentSeconds: seconds } }),
+      supabase.functions.invoke("code-feedback", { body: { code, language, problemTitle: selected.title, problemPrompt: selected.prompt } }),
+    ]);
+
+    // Handle AI feedback
+    if (feedbackRes.status === "fulfilled" && feedbackRes.value.data && !feedbackRes.value.error) {
+      const fb = feedbackRes.value.data as AIFeedback;
+      if (fb.score !== undefined) setAiFeedback(fb);
+    }
+    setFeedbackLoading(false);
+
+    // Handle score-code result
     setRunning(false);
-    if (error) {
-      setDebugLines((lines) => [...lines, `✕ Function error: ${error.message}`]);
-      toast({ title: "Scoring failed", description: error.message, variant: "destructive" });
+    if (scoreRes.status === "rejected" || (scoreRes.status === "fulfilled" && scoreRes.value.error)) {
+      const errMsg = scoreRes.status === "rejected" ? String(scoreRes.reason) : scoreRes.value.error?.message ?? "Scoring failed";
+      setDebugLines((lines) => [...lines, `✕ Function error: ${errMsg}`]);
+      toast({ title: "Scoring failed", description: errMsg, variant: "destructive" });
+      // Still save to history if AI feedback succeeded
+      if (aiFeedback || (feedbackRes.status === "fulfilled" && feedbackRes.value.data?.score !== undefined)) {
+        const fb = (feedbackRes.status === "fulfilled" ? feedbackRes.value.data : null) as AIFeedback | null;
+        if (fb) {
+          const item: HistoryItem = { id: crypto.randomUUID(), problemId: selected.id, problemTitle: selected.title, language, score: fb.score, createdAt: Date.now(), result: { correctnessScore: 0, qualityScore: 0, speedScore: 0, communicationScore: 0, employabilityScore: fb.score, stored: false, report: { summary: fb.employabilityImpact, strengths: fb.strengths, improvements: fb.improvements, execution: { pass: 0, total: 0, stdout: "", stderr: "" } } } };
+          const nextHistory = [item, ...history].slice(0, 12);
+          setHistory(nextHistory);
+          localStorage.setItem(historyKey, JSON.stringify(nextHistory));
+        }
+      }
       return;
     }
+
+    const data = scoreRes.value.data;
     const scored = data as ScoreResult;
     if (!scored?.report?.execution) {
       const message = (data as { error?: string })?.error ?? "Compiler returned an invalid response.";
@@ -230,12 +262,13 @@ export default function CodingLab() {
       execution.stdout ? `stdout:\n${execution.stdout}` : "stdout: <empty>",
       execution.stderr ? `stderr:\n${execution.stderr}` : "stderr: <empty>",
     ]);
-    const item: HistoryItem = { id: crypto.randomUUID(), problemId: selected.id, problemTitle: selected.title, language, score: scored.employabilityScore, createdAt: Date.now(), result: scored };
+    const finalScore = aiFeedback?.score ?? (feedbackRes.status === "fulfilled" ? (feedbackRes.value.data as AIFeedback)?.score : null) ?? scored.employabilityScore;
+    const item: HistoryItem = { id: crypto.randomUUID(), problemId: selected.id, problemTitle: selected.title, language, score: finalScore, createdAt: Date.now(), result: scored };
     const nextHistory = [item, ...history].slice(0, 12);
     setResult(scored);
     setHistory(nextHistory);
     localStorage.setItem(historyKey, JSON.stringify(nextHistory));
-    toast({ title: "Code report ready", description: `Employability score: ${scored.employabilityScore}%` });
+    toast({ title: "Code report ready", description: `Score: ${finalScore}%` });
   };
 
   const rubric = result ? [
@@ -325,7 +358,110 @@ export default function CodingLab() {
           </main>
 
           <aside className="space-y-4 2xl:h-[calc(100vh-150px)] 2xl:overflow-y-auto">
-            <section className="rounded-2xl border border-border bg-card p-4 shadow-card"><div className="flex items-center gap-2 font-display font-bold"><BrainCircuit className="h-4 w-4 text-accent" /> Feedback report</div>{!result ? <div className="mt-10 flex flex-col items-center text-center text-muted-foreground"><Gauge className="h-10 w-10 text-primary" /><h3 className="mt-3 font-display font-bold text-foreground">No report yet</h3><p className="mt-1 text-sm">Run code to generate ATS-style and learning feedback.</p></div> : <div className="mt-4 space-y-4"><div className="rounded-2xl border border-border bg-gradient-card p-4 text-center"><p className="text-xs text-muted-foreground">Employability coding score</p><p className="mt-1 text-5xl font-bold text-accent">{result.employabilityScore}</p><p className="mt-2 text-xs leading-relaxed text-muted-foreground">{result.report.summary}</p></div>{rubric.map(({ label, value, icon: Icon }) => <div key={label}><div className="mb-1 flex items-center justify-between text-xs font-semibold"><span className="flex items-center gap-1.5"><Icon className="h-3.5 w-3.5 text-primary" />{label}</span><span>{value}%</span></div><Progress value={value} className="h-2" /><p className="mt-1 text-[11px] text-muted-foreground">{targetedSuggestion(label, value)}</p></div>)}<div className="rounded-xl bg-secondary p-3"><p className="text-xs font-bold uppercase tracking-wider text-accent">AI failure explanation</p><p className="mt-2 text-xs leading-relaxed text-muted-foreground">{result.correctnessScore < 80 ? "Your solution likely misses edge cases or returns a different output shape than the tests expect. Review failed test output in the debugger first." : "Tests look strong; next improve explanation, naming, and complexity notes for interview signal."}</p></div><div className="rounded-xl bg-secondary p-3"><p className="text-xs font-bold uppercase tracking-wider text-warning">Roadmap priority</p><p className="mt-2 text-xs leading-relaxed text-muted-foreground">Prioritize {lowestRubric?.label ?? "Correctness"}: this maps to roadmap skills for problem solving, assessment readiness, and technical interviews.</p></div></div>}</section>
+            <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
+              <div className="flex items-center gap-2 font-display font-bold"><BrainCircuit className="h-4 w-4 text-accent" /> Feedback report</div>
+              {feedbackLoading ? (
+                <div className="mt-4 space-y-4">
+                  <Skeleton className="h-24 w-full rounded-2xl" />
+                  <Skeleton className="h-8 w-3/4 rounded-xl" />
+                  <Skeleton className="h-8 w-full rounded-xl" />
+                  <Skeleton className="h-8 w-2/3 rounded-xl" />
+                  <Skeleton className="h-20 w-full rounded-xl" />
+                </div>
+              ) : aiFeedback ? (
+                <div className="mt-4 space-y-4">
+                  {/* Score badge */}
+                  <div className="rounded-2xl border border-border bg-gradient-card p-4 text-center">
+                    <p className="text-xs text-muted-foreground">AI Code Score</p>
+                    <p className={cn("mt-1 text-5xl font-bold", aiFeedback.score >= 80 ? "text-accent" : aiFeedback.score >= 50 ? "text-warning" : "text-destructive")}>{aiFeedback.score}</p>
+                  </div>
+
+                  {/* Complexity chips */}
+                  <div className="flex gap-2">
+                    <span className="flex-1 rounded-xl bg-primary/10 px-3 py-2 text-center text-xs font-semibold text-primary">
+                      Time: {aiFeedback.timeComplexity}
+                    </span>
+                    <span className="flex-1 rounded-xl bg-accent/10 px-3 py-2 text-center text-xs font-semibold text-accent">
+                      Space: {aiFeedback.spaceComplexity}
+                    </span>
+                  </div>
+
+                  {/* Strengths */}
+                  <div className="rounded-xl bg-secondary p-3">
+                    <p className="text-xs font-bold uppercase tracking-wider text-accent mb-2">Strengths</p>
+                    <div className="space-y-1.5">
+                      {aiFeedback.strengths.map((s, i) => (
+                        <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 text-accent shrink-0" />
+                          <span>{s}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Improvements */}
+                  <div className="rounded-xl bg-secondary p-3">
+                    <p className="text-xs font-bold uppercase tracking-wider text-warning mb-2">Areas to Improve</p>
+                    <div className="space-y-1.5">
+                      {aiFeedback.improvements.map((s, i) => (
+                        <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <AlertTriangle className="h-3.5 w-3.5 mt-0.5 text-warning shrink-0" />
+                          <span>{s}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Career Impact */}
+                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
+                    <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">
+                      <Zap className="inline h-3 w-3 mr-1" />Career Impact
+                    </p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">{aiFeedback.employabilityImpact}</p>
+                  </div>
+
+                  {/* Try Next */}
+                  <Button variant="outline" className="w-full rounded-xl gap-2 text-xs">
+                    <ArrowRight className="h-3.5 w-3.5" /> Try Next: {aiFeedback.nextChallenge}
+                  </Button>
+
+                  {/* Original rubric if available */}
+                  {result && rubric.map(({ label, value, icon: Icon }) => (
+                    <div key={label}>
+                      <div className="mb-1 flex items-center justify-between text-xs font-semibold">
+                        <span className="flex items-center gap-1.5"><Icon className="h-3.5 w-3.5 text-primary" />{label}</span>
+                        <span>{value}%</span>
+                      </div>
+                      <Progress value={value} className="h-2" />
+                    </div>
+                  ))}
+                </div>
+              ) : !result ? (
+                <div className="mt-10 flex flex-col items-center text-center text-muted-foreground">
+                  <Gauge className="h-10 w-10 text-primary" />
+                  <h3 className="mt-3 font-display font-bold text-foreground">No report yet</h3>
+                  <p className="mt-1 text-sm">Run code to generate AI-powered feedback.</p>
+                </div>
+              ) : (
+                <div className="mt-4 space-y-4">
+                  <div className="rounded-2xl border border-border bg-gradient-card p-4 text-center">
+                    <p className="text-xs text-muted-foreground">Employability coding score</p>
+                    <p className="mt-1 text-5xl font-bold text-accent">{result.employabilityScore}</p>
+                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{result.report.summary}</p>
+                  </div>
+                  {rubric.map(({ label, value, icon: Icon }) => (
+                    <div key={label}>
+                      <div className="mb-1 flex items-center justify-between text-xs font-semibold">
+                        <span className="flex items-center gap-1.5"><Icon className="h-3.5 w-3.5 text-primary" />{label}</span>
+                        <span>{value}%</span>
+                      </div>
+                      <Progress value={value} className="h-2" />
+                      <p className="mt-1 text-[11px] text-muted-foreground">{targetedSuggestion(label, value)}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
             <section className="rounded-2xl border border-border bg-card p-4 shadow-card"><div className="flex items-center gap-2 font-display font-bold"><History className="h-4 w-4 text-primary" /> Submission history</div>{history.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">Your scored attempts will appear here.</p> : <div className="mt-4 space-y-3"><div className="flex h-20 items-end gap-1 rounded-xl bg-secondary p-3">{trend.map((item) => <div key={item.id} className="flex-1 rounded-t bg-primary" style={{ height: `${Math.max(12, item.score)}%` }} title={`${item.score}%`} />)}</div>{history.slice(0, 5).map((item) => <div key={item.id} className="rounded-xl border border-border bg-secondary p-3"><div className="flex items-center justify-between gap-2"><div className="min-w-0"><p className="truncate text-sm font-semibold">{item.problemTitle}</p><p className="text-[11px] text-muted-foreground">{labels[item.language]} · {new Date(item.createdAt).toLocaleDateString()}</p></div><span className="font-bold text-accent">{item.score}</span></div><button onClick={() => retake(item)} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary"><RotateCcw className="h-3 w-3" /> Retake</button></div>)}</div>}</section>
           </aside>
         </div>
