@@ -211,14 +211,43 @@ export default function CodingLab() {
   const submit = async () => {
     setRunning(true);
     setResult(null);
+    setAiFeedback(null);
+    setFeedbackLoading(true);
     setDebugLines([`▶ Running ${selected.title}`, `Language: ${labels[language]}`, `Files attached: ${files.map((file) => file.name).join(", ")}`, "Sending code to compiler API..."]);
-    const { data, error } = await supabase.functions.invoke("score-code", { body: { problemId: selected.id, language, code, files, timeSpentSeconds: seconds } });
+
+    // Fire both requests in parallel
+    const [scoreRes, feedbackRes] = await Promise.allSettled([
+      supabase.functions.invoke("score-code", { body: { problemId: selected.id, language, code, files, timeSpentSeconds: seconds } }),
+      supabase.functions.invoke("code-feedback", { body: { code, language, problemTitle: selected.title, problemPrompt: selected.prompt } }),
+    ]);
+
+    // Handle AI feedback
+    if (feedbackRes.status === "fulfilled" && feedbackRes.value.data && !feedbackRes.value.error) {
+      const fb = feedbackRes.value.data as AIFeedback;
+      if (fb.score !== undefined) setAiFeedback(fb);
+    }
+    setFeedbackLoading(false);
+
+    // Handle score-code result
     setRunning(false);
-    if (error) {
-      setDebugLines((lines) => [...lines, `✕ Function error: ${error.message}`]);
-      toast({ title: "Scoring failed", description: error.message, variant: "destructive" });
+    if (scoreRes.status === "rejected" || (scoreRes.status === "fulfilled" && scoreRes.value.error)) {
+      const errMsg = scoreRes.status === "rejected" ? String(scoreRes.reason) : scoreRes.value.error?.message ?? "Scoring failed";
+      setDebugLines((lines) => [...lines, `✕ Function error: ${errMsg}`]);
+      toast({ title: "Scoring failed", description: errMsg, variant: "destructive" });
+      // Still save to history if AI feedback succeeded
+      if (aiFeedback || (feedbackRes.status === "fulfilled" && feedbackRes.value.data?.score !== undefined)) {
+        const fb = (feedbackRes.status === "fulfilled" ? feedbackRes.value.data : null) as AIFeedback | null;
+        if (fb) {
+          const item: HistoryItem = { id: crypto.randomUUID(), problemId: selected.id, problemTitle: selected.title, language, score: fb.score, createdAt: Date.now(), result: { correctnessScore: 0, qualityScore: 0, speedScore: 0, communicationScore: 0, employabilityScore: fb.score, stored: false, report: { summary: fb.employabilityImpact, strengths: fb.strengths, improvements: fb.improvements, execution: { pass: 0, total: 0, stdout: "", stderr: "" } } } };
+          const nextHistory = [item, ...history].slice(0, 12);
+          setHistory(nextHistory);
+          localStorage.setItem(historyKey, JSON.stringify(nextHistory));
+        }
+      }
       return;
     }
+
+    const data = scoreRes.value.data;
     const scored = data as ScoreResult;
     if (!scored?.report?.execution) {
       const message = (data as { error?: string })?.error ?? "Compiler returned an invalid response.";
@@ -233,12 +262,13 @@ export default function CodingLab() {
       execution.stdout ? `stdout:\n${execution.stdout}` : "stdout: <empty>",
       execution.stderr ? `stderr:\n${execution.stderr}` : "stderr: <empty>",
     ]);
-    const item: HistoryItem = { id: crypto.randomUUID(), problemId: selected.id, problemTitle: selected.title, language, score: scored.employabilityScore, createdAt: Date.now(), result: scored };
+    const finalScore = aiFeedback?.score ?? (feedbackRes.status === "fulfilled" ? (feedbackRes.value.data as AIFeedback)?.score : null) ?? scored.employabilityScore;
+    const item: HistoryItem = { id: crypto.randomUUID(), problemId: selected.id, problemTitle: selected.title, language, score: finalScore, createdAt: Date.now(), result: scored };
     const nextHistory = [item, ...history].slice(0, 12);
     setResult(scored);
     setHistory(nextHistory);
     localStorage.setItem(historyKey, JSON.stringify(nextHistory));
-    toast({ title: "Code report ready", description: `Employability score: ${scored.employabilityScore}%` });
+    toast({ title: "Code report ready", description: `Score: ${finalScore}%` });
   };
 
   const rubric = result ? [
