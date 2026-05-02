@@ -6,7 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
-import { BadgeCheck, BrainCircuit, CheckCircle2, Clock3, Code2, FileInput, FilePlus2, FileSearch, Gauge, History, Play, RotateCcw, Save, Search, ShieldCheck, Sparkles, Terminal, TrendingUp, Type, X, XCircle } from "lucide-react";
+import { BadgeCheck, BrainCircuit, CheckCircle2, Clock3, Code2, FileInput, FilePlus2, FileSearch, Gauge, History, Play, RotateCcw, Save, Search, ShieldCheck, Sparkles, Terminal, TrendingUp, Type, X, XCircle, AlertTriangle, ArrowRight, Zap } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type CodingProblem = Pick<Tables<"coding_problems">, "id" | "title" | "difficulty" | "category" | "prompt" | "input_format" | "output_format" | "examples" | "constraints_text" | "supported_languages" | "starter_code">;
 type Language = "javascript" | "typescript" | "python" | "java" | "cpp" | "csharp" | "go" | "ruby" | "php";
