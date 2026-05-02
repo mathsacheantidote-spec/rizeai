@@ -14,6 +14,7 @@ type Language = "javascript" | "typescript" | "python" | "java" | "cpp" | "cshar
 type FileTab = { name: string; content: string };
 type TestResult = { name: string; passed: boolean; expected?: string; actual?: string };
 type HistoryItem = { id: string; problemId: string; problemTitle: string; language: Language; score: number; createdAt: number; result: ScoreResult };
+type AIFeedback = { score: number; timeComplexity: string; spaceComplexity: string; strengths: string[]; improvements: string[]; employabilityImpact: string; nextChallenge: string };
 type ScoreResult = {
   correctnessScore: number;
   qualityScore: number;
