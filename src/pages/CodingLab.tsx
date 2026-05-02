@@ -358,7 +358,110 @@ export default function CodingLab() {
           </main>
 
           <aside className="space-y-4 2xl:h-[calc(100vh-150px)] 2xl:overflow-y-auto">
-            <section className="rounded-2xl border border-border bg-card p-4 shadow-card"><div className="flex items-center gap-2 font-display font-bold"><BrainCircuit className="h-4 w-4 text-accent" /> Feedback report</div>{!result ? <div className="mt-10 flex flex-col items-center text-center text-muted-foreground"><Gauge className="h-10 w-10 text-primary" /><h3 className="mt-3 font-display font-bold text-foreground">No report yet</h3><p className="mt-1 text-sm">Run code to generate ATS-style and learning feedback.</p></div> : <div className="mt-4 space-y-4"><div className="rounded-2xl border border-border bg-gradient-card p-4 text-center"><p className="text-xs text-muted-foreground">Employability coding score</p><p className="mt-1 text-5xl font-bold text-accent">{result.employabilityScore}</p><p className="mt-2 text-xs leading-relaxed text-muted-foreground">{result.report.summary}</p></div>{rubric.map(({ label, value, icon: Icon }) => <div key={label}><div className="mb-1 flex items-center justify-between text-xs font-semibold"><span className="flex items-center gap-1.5"><Icon className="h-3.5 w-3.5 text-primary" />{label}</span><span>{value}%</span></div><Progress value={value} className="h-2" /><p className="mt-1 text-[11px] text-muted-foreground">{targetedSuggestion(label, value)}</p></div>)}<div className="rounded-xl bg-secondary p-3"><p className="text-xs font-bold uppercase tracking-wider text-accent">AI failure explanation</p><p className="mt-2 text-xs leading-relaxed text-muted-foreground">{result.correctnessScore < 80 ? "Your solution likely misses edge cases or returns a different output shape than the tests expect. Review failed test output in the debugger first." : "Tests look strong; next improve explanation, naming, and complexity notes for interview signal."}</p></div><div className="rounded-xl bg-secondary p-3"><p className="text-xs font-bold uppercase tracking-wider text-warning">Roadmap priority</p><p className="mt-2 text-xs leading-relaxed text-muted-foreground">Prioritize {lowestRubric?.label ?? "Correctness"}: this maps to roadmap skills for problem solving, assessment readiness, and technical interviews.</p></div></div>}</section>
+            <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
+              <div className="flex items-center gap-2 font-display font-bold"><BrainCircuit className="h-4 w-4 text-accent" /> Feedback report</div>
+              {feedbackLoading ? (
+                <div className="mt-4 space-y-4">
+                  <Skeleton className="h-24 w-full rounded-2xl" />
+                  <Skeleton className="h-8 w-3/4 rounded-xl" />
+                  <Skeleton className="h-8 w-full rounded-xl" />
+                  <Skeleton className="h-8 w-2/3 rounded-xl" />
+                  <Skeleton className="h-20 w-full rounded-xl" />
+                </div>
+              ) : aiFeedback ? (
+                <div className="mt-4 space-y-4">
+                  {/* Score badge */}
+                  <div className="rounded-2xl border border-border bg-gradient-card p-4 text-center">
+                    <p className="text-xs text-muted-foreground">AI Code Score</p>
+                    <p className={cn("mt-1 text-5xl font-bold", aiFeedback.score >= 80 ? "text-accent" : aiFeedback.score >= 50 ? "text-warning" : "text-destructive")}>{aiFeedback.score}</p>
+                  </div>
+
+                  {/* Complexity chips */}
+                  <div className="flex gap-2">
+                    <span className="flex-1 rounded-xl bg-primary/10 px-3 py-2 text-center text-xs font-semibold text-primary">
+                      Time: {aiFeedback.timeComplexity}
+                    </span>
+                    <span className="flex-1 rounded-xl bg-accent/10 px-3 py-2 text-center text-xs font-semibold text-accent">
+                      Space: {aiFeedback.spaceComplexity}
+                    </span>
+                  </div>
+
+                  {/* Strengths */}
+                  <div className="rounded-xl bg-secondary p-3">
+                    <p className="text-xs font-bold uppercase tracking-wider text-accent mb-2">Strengths</p>
+                    <div className="space-y-1.5">
+                      {aiFeedback.strengths.map((s, i) => (
+                        <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 text-accent shrink-0" />
+                          <span>{s}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Improvements */}
+                  <div className="rounded-xl bg-secondary p-3">
+                    <p className="text-xs font-bold uppercase tracking-wider text-warning mb-2">Areas to Improve</p>
+                    <div className="space-y-1.5">
+                      {aiFeedback.improvements.map((s, i) => (
+                        <div key={i} className="flex items-start gap-2 text-xs text-muted-foreground">
+                          <AlertTriangle className="h-3.5 w-3.5 mt-0.5 text-warning shrink-0" />
+                          <span>{s}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Career Impact */}
+                  <div className="rounded-xl border border-primary/30 bg-primary/5 p-3">
+                    <p className="text-xs font-bold uppercase tracking-wider text-primary mb-2">
+                      <Zap className="inline h-3 w-3 mr-1" />Career Impact
+                    </p>
+                    <p className="text-xs leading-relaxed text-muted-foreground">{aiFeedback.employabilityImpact}</p>
+                  </div>
+
+                  {/* Try Next */}
+                  <Button variant="outline" className="w-full rounded-xl gap-2 text-xs">
+                    <ArrowRight className="h-3.5 w-3.5" /> Try Next: {aiFeedback.nextChallenge}
+                  </Button>
+
+                  {/* Original rubric if available */}
+                  {result && rubric.map(({ label, value, icon: Icon }) => (
+                    <div key={label}>
+                      <div className="mb-1 flex items-center justify-between text-xs font-semibold">
+                        <span className="flex items-center gap-1.5"><Icon className="h-3.5 w-3.5 text-primary" />{label}</span>
+                        <span>{value}%</span>
+                      </div>
+                      <Progress value={value} className="h-2" />
+                    </div>
+                  ))}
+                </div>
+              ) : !result ? (
+                <div className="mt-10 flex flex-col items-center text-center text-muted-foreground">
+                  <Gauge className="h-10 w-10 text-primary" />
+                  <h3 className="mt-3 font-display font-bold text-foreground">No report yet</h3>
+                  <p className="mt-1 text-sm">Run code to generate AI-powered feedback.</p>
+                </div>
+              ) : (
+                <div className="mt-4 space-y-4">
+                  <div className="rounded-2xl border border-border bg-gradient-card p-4 text-center">
+                    <p className="text-xs text-muted-foreground">Employability coding score</p>
+                    <p className="mt-1 text-5xl font-bold text-accent">{result.employabilityScore}</p>
+                    <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{result.report.summary}</p>
+                  </div>
+                  {rubric.map(({ label, value, icon: Icon }) => (
+                    <div key={label}>
+                      <div className="mb-1 flex items-center justify-between text-xs font-semibold">
+                        <span className="flex items-center gap-1.5"><Icon className="h-3.5 w-3.5 text-primary" />{label}</span>
+                        <span>{value}%</span>
+                      </div>
+                      <Progress value={value} className="h-2" />
+                      <p className="mt-1 text-[11px] text-muted-foreground">{targetedSuggestion(label, value)}</p>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
             <section className="rounded-2xl border border-border bg-card p-4 shadow-card"><div className="flex items-center gap-2 font-display font-bold"><History className="h-4 w-4 text-primary" /> Submission history</div>{history.length === 0 ? <p className="mt-4 text-sm text-muted-foreground">Your scored attempts will appear here.</p> : <div className="mt-4 space-y-3"><div className="flex h-20 items-end gap-1 rounded-xl bg-secondary p-3">{trend.map((item) => <div key={item.id} className="flex-1 rounded-t bg-primary" style={{ height: `${Math.max(12, item.score)}%` }} title={`${item.score}%`} />)}</div>{history.slice(0, 5).map((item) => <div key={item.id} className="rounded-xl border border-border bg-secondary p-3"><div className="flex items-center justify-between gap-2"><div className="min-w-0"><p className="truncate text-sm font-semibold">{item.problemTitle}</p><p className="text-[11px] text-muted-foreground">{labels[item.language]} · {new Date(item.createdAt).toLocaleDateString()}</p></div><span className="font-bold text-accent">{item.score}</span></div><button onClick={() => retake(item)} className="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-primary"><RotateCcw className="h-3 w-3" /> Retake</button></div>)}</div>}</section>
           </aside>
         </div>
