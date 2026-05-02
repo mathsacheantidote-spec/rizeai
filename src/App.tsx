@@ -20,6 +20,8 @@ import Insights from "./pages/Insights.tsx";
 import Settings from "./pages/Settings.tsx";
 import CareerEngine from "./pages/CareerEngine.tsx";
 import CodingLab from "./pages/CodingLab.tsx";
+import Mentors from "./pages/Mentors.tsx";
+import { AIMentorChat } from "./components/AIMentorChat";
 
 const App = () => (
   <TooltipProvider>
@@ -43,10 +45,12 @@ const App = () => (
           <Route path="/settings" element={<Settings />} />
           <Route path="/career-engine" element={<CareerEngine />} />
           <Route path="/coding-lab" element={<CodingLab />} />
+          <Route path="/mentors" element={<Mentors />} />
           <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <AIMentorChat />
       </BrowserRouter>
   </TooltipProvider>
 );
