@@ -143,7 +143,8 @@ export default function CodingLab() {
   const [debugLines, setDebugLines] = useState<string[]>(["Debugger ready. Run code to capture stdout, stderr, tests, and runner status."]);
   const [editorTheme, setEditorTheme] = useState<keyof typeof editorThemes>("rize");
   const [editorFont, setEditorFont] = useState<keyof typeof editorFonts>("jetbrains");
-
+  const [aiFeedback, setAiFeedback] = useState<AIFeedback | null>(null);
+  const [feedbackLoading, setFeedbackLoading] = useState(false);
   useEffect(() => {
     const loadProblems = async () => {
       const { data } = await supabase.from("coding_problems").select("id,title,difficulty,category,prompt,input_format,output_format,examples,constraints_text,supported_languages,starter_code").order("created_at", { ascending: true });
