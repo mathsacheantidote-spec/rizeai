@@ -372,12 +372,37 @@ export default function CodingLab() {
             <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
               <div className="flex items-center gap-2 font-display font-bold"><BrainCircuit className="h-4 w-4 text-accent" /> Feedback report</div>
               {feedbackLoading ? (
-                <div className="mt-4 space-y-4">
-                  <Skeleton className="h-24 w-full rounded-2xl" />
-                  <Skeleton className="h-8 w-3/4 rounded-xl" />
-                  <Skeleton className="h-8 w-full rounded-xl" />
-                  <Skeleton className="h-8 w-2/3 rounded-xl" />
-                  <Skeleton className="h-20 w-full rounded-xl" />
+                <div className="mt-4 space-y-4 animate-pulse">
+                  {/* Score skeleton */}
+                  <div className="rounded-2xl border border-border bg-secondary/50 p-5 text-center">
+                    <Skeleton className="h-3 w-20 mx-auto rounded" />
+                    <Skeleton className="h-12 w-16 mx-auto mt-2 rounded-lg" />
+                  </div>
+                  {/* Complexity chips */}
+                  <div className="flex gap-2">
+                    <Skeleton className="h-9 flex-1 rounded-xl" />
+                    <Skeleton className="h-9 flex-1 rounded-xl" />
+                  </div>
+                  {/* Strengths */}
+                  <div className="rounded-xl bg-secondary/50 p-3 space-y-2">
+                    <Skeleton className="h-3 w-16 rounded" />
+                    <Skeleton className="h-3 w-full rounded" />
+                    <Skeleton className="h-3 w-4/5 rounded" />
+                    <Skeleton className="h-3 w-3/4 rounded" />
+                  </div>
+                  {/* Improvements */}
+                  <div className="rounded-xl bg-secondary/50 p-3 space-y-2">
+                    <Skeleton className="h-3 w-24 rounded" />
+                    <Skeleton className="h-3 w-full rounded" />
+                    <Skeleton className="h-3 w-5/6 rounded" />
+                  </div>
+                  {/* Career impact */}
+                  <div className="rounded-xl border border-border/50 p-3 space-y-2">
+                    <Skeleton className="h-3 w-20 rounded" />
+                    <Skeleton className="h-3 w-full rounded" />
+                    <Skeleton className="h-3 w-2/3 rounded" />
+                  </div>
+                  <p className="text-center text-xs text-muted-foreground">Analyzing your code with AI...</p>
                 </div>
               ) : aiFeedback ? (
                 <div className="mt-4 space-y-4">
