@@ -14,6 +14,53 @@ export type Database = {
   }
   public: {
     Tables: {
+      bookings: {
+        Row: {
+          created_at: string
+          duration_minutes: number
+          id: string
+          jitsi_room_id: string
+          mentor_id: string
+          notes: string | null
+          scheduled_at: string
+          status: string
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          jitsi_room_id?: string
+          mentor_id: string
+          notes?: string | null
+          scheduled_at: string
+          status?: string
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          jitsi_room_id?: string
+          mentor_id?: string
+          notes?: string | null
+          scheduled_at?: string
+          status?: string
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       coding_problems: {
         Row: {
           category: string
@@ -123,6 +170,127 @@ export type Database = {
             columns: ["problem_id"]
             isOneToOne: false
             referencedRelation: "coding_problems"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentor_availability: {
+        Row: {
+          created_at: string
+          day_of_week: number
+          end_time: string
+          id: string
+          mentor_id: string
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          day_of_week: number
+          end_time: string
+          id?: string
+          mentor_id: string
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          day_of_week?: number
+          end_time?: string
+          id?: string
+          mentor_id?: string
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mentor_availability_mentor_id_fkey"
+            columns: ["mentor_id"]
+            isOneToOne: false
+            referencedRelation: "mentors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mentors: {
+        Row: {
+          available: boolean | null
+          avatar_color: string | null
+          bio: string | null
+          category: string
+          company: string
+          created_at: string
+          id: string
+          initials: string
+          match_score: number | null
+          name: string
+          role: string
+          skills: string[] | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          available?: boolean | null
+          avatar_color?: string | null
+          bio?: string | null
+          category?: string
+          company?: string
+          created_at?: string
+          id?: string
+          initials?: string
+          match_score?: number | null
+          name: string
+          role?: string
+          skills?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          available?: boolean | null
+          avatar_color?: string | null
+          bio?: string | null
+          category?: string
+          company?: string
+          created_at?: string
+          id?: string
+          initials?: string
+          match_score?: number | null
+          name?: string
+          role?: string
+          skills?: string[] | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      session_feedback: {
+        Row: {
+          booking_id: string
+          comment: string | null
+          created_at: string
+          from_user_id: string
+          id: string
+          rating: number
+        }
+        Insert: {
+          booking_id: string
+          comment?: string | null
+          created_at?: string
+          from_user_id: string
+          id?: string
+          rating: number
+        }
+        Update: {
+          booking_id?: string
+          comment?: string | null
+          created_at?: string
+          from_user_id?: string
+          id?: string
+          rating?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "session_feedback_booking_id_fkey"
+            columns: ["booking_id"]
+            isOneToOne: false
+            referencedRelation: "bookings"
             referencedColumns: ["id"]
           },
         ]
