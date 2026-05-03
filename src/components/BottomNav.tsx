@@ -25,6 +25,7 @@ const sideTabs = [
   { to: "/resume", icon: FileText, label: "Resume" },
   { to: "/insights", icon: Newspaper, label: "Insights" },
   { to: "/profile", icon: User, label: "Profile" },
+  { to: "/mentor-dashboard", icon: LayoutDashboard, label: "Mentor Panel" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
 
