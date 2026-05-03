@@ -1,6 +1,6 @@
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Home, Map, Sparkles, User, Bell, LogOut, Check, ChevronsUpDown, Building2, FileText, Newspaper, Settings, Search, Brain, Code2, Users } from "lucide-react";
+import { Home, Map, Sparkles, User, Bell, LogOut, Check, ChevronsUpDown, Building2, FileText, Newspaper, Settings, Search, Brain, Code2, Users, LayoutDashboard } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useRize } from "@/lib/store";
 import { JOB_ROLES } from "@/lib/rize-data";
@@ -25,6 +25,7 @@ const sideTabs = [
   { to: "/resume", icon: FileText, label: "Resume" },
   { to: "/insights", icon: Newspaper, label: "Insights" },
   { to: "/profile", icon: User, label: "Profile" },
+  { to: "/mentor-dashboard", icon: LayoutDashboard, label: "Mentor Panel" },
   { to: "/settings", icon: Settings, label: "Settings" },
 ];
 

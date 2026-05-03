@@ -326,7 +326,18 @@ export default function CodingLab() {
             <div className="border-b border-border p-4">
               <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
                 <div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><h2 className="font-display text-xl font-bold">{selected.title}</h2><span className="rounded-full bg-accent-soft px-2.5 py-1 text-[10px] font-bold uppercase text-accent">{selected.category}</span></div><p className="mt-2 max-w-4xl text-sm leading-relaxed text-muted-foreground">{selected.prompt}</p></div>
-                <Button onClick={submit} disabled={running || !code.trim()} className="h-11 rounded-full bg-gradient-primary px-5 text-primary-foreground shadow-glow">{running ? <Sparkles className="h-4 w-4 animate-pulse" /> : <Play className="h-4 w-4" />}{running ? "Running" : "Run code"}</Button>
+                <Button
+                  onClick={submit}
+                  disabled={running || feedbackLoading || !code.trim()}
+                  title={feedbackLoading ? "Please wait while feedback is being generated" : undefined}
+                  className={cn(
+                    "h-11 rounded-full px-5 text-primary-foreground shadow-glow transition-all",
+                    (running || feedbackLoading) ? "opacity-60 cursor-not-allowed bg-muted" : "bg-gradient-primary"
+                  )}
+                >
+                  {running || feedbackLoading ? <Sparkles className="h-4 w-4 animate-pulse" /> : <Play className="h-4 w-4" />}
+                  {running ? "Running..." : feedbackLoading ? "Generating feedback..." : "Run code"}
+                </Button>
               </div>
               <div className="mt-4 grid gap-3 md:grid-cols-2"><div className="rounded-xl bg-secondary p-3 text-xs"><span className="font-bold text-foreground">Input:</span> <span className="text-muted-foreground">{selected.input_format}</span></div><div className="rounded-xl bg-secondary p-3 text-xs"><span className="font-bold text-foreground">Output:</span> <span className="text-muted-foreground">{selected.output_format}</span></div></div>
             </div>
@@ -361,12 +372,37 @@ export default function CodingLab() {
             <section className="rounded-2xl border border-border bg-card p-4 shadow-card">
               <div className="flex items-center gap-2 font-display font-bold"><BrainCircuit className="h-4 w-4 text-accent" /> Feedback report</div>
               {feedbackLoading ? (
-                <div className="mt-4 space-y-4">
-                  <Skeleton className="h-24 w-full rounded-2xl" />
-                  <Skeleton className="h-8 w-3/4 rounded-xl" />
-                  <Skeleton className="h-8 w-full rounded-xl" />
-                  <Skeleton className="h-8 w-2/3 rounded-xl" />
-                  <Skeleton className="h-20 w-full rounded-xl" />
+                <div className="mt-4 space-y-4 animate-pulse">
+                  {/* Score skeleton */}
+                  <div className="rounded-2xl border border-border bg-secondary/50 p-5 text-center">
+                    <Skeleton className="h-3 w-20 mx-auto rounded" />
+                    <Skeleton className="h-12 w-16 mx-auto mt-2 rounded-lg" />
+                  </div>
+                  {/* Complexity chips */}
+                  <div className="flex gap-2">
+                    <Skeleton className="h-9 flex-1 rounded-xl" />
+                    <Skeleton className="h-9 flex-1 rounded-xl" />
+                  </div>
+                  {/* Strengths */}
+                  <div className="rounded-xl bg-secondary/50 p-3 space-y-2">
+                    <Skeleton className="h-3 w-16 rounded" />
+                    <Skeleton className="h-3 w-full rounded" />
+                    <Skeleton className="h-3 w-4/5 rounded" />
+                    <Skeleton className="h-3 w-3/4 rounded" />
+                  </div>
+                  {/* Improvements */}
+                  <div className="rounded-xl bg-secondary/50 p-3 space-y-2">
+                    <Skeleton className="h-3 w-24 rounded" />
+                    <Skeleton className="h-3 w-full rounded" />
+                    <Skeleton className="h-3 w-5/6 rounded" />
+                  </div>
+                  {/* Career impact */}
+                  <div className="rounded-xl border border-border/50 p-3 space-y-2">
+                    <Skeleton className="h-3 w-20 rounded" />
+                    <Skeleton className="h-3 w-full rounded" />
+                    <Skeleton className="h-3 w-2/3 rounded" />
+                  </div>
+                  <p className="text-center text-xs text-muted-foreground">Analyzing your code with AI...</p>
                 </div>
               ) : aiFeedback ? (
                 <div className="mt-4 space-y-4">
